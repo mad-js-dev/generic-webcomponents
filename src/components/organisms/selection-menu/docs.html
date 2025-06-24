@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Check for content before DOCTYPE
+        if (document.doctype === null || document.doctype.name !== 'html' || 
+            document.doctype.publicId !== '' || 
+            document.doctype.systemId !== '') {
+          console.warn('Document type is not standard HTML5 or there is content before DOCTYPE');
+        }
+      </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selection Menu Demo</title>
+    <!-- Import all required components -->
+    <script type="module">
+        // Import the selection menu component first
+        import './SelectionMenu.js';
+        // Import the collapsible components
+        import '../../molecules/collapsible-list/CollapsibleList.js';
+        import '../../atoms/collapsible-item/CollapsibleItem.js';
+        
+        // Make sure components are defined
+        Promise.all([
+          customElements.whenDefined('collapsible-list'),
+          customElements.whenDefined('collapsible-item'),
+          customElements.whenDefined('selection-menu')
+        ]).then(() => {
+          console.log('All components are ready');
+        });
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f7fa;
+        }
+        
+        .demo {
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            border-radius: 8px;
+        }
+        
+        .demo__title {
+            color: #333;
+            margin-top: 0;
+        }
+        
+        .demo__section {
+            margin-top: 2rem;
+        }
+        
+        .demo__section-title {
+            color: #333;
+            margin-top: 0;
+        }
+        
+        .demo__area {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .demo__menu-container {
+            flex: 1;
+        }
+        
+        .demo__preview {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+        }
+        
+        .demo__preview-title {
+            margin-top: 0;
+            color: #555;
+        }
+        
+        .demo__preview-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f6f8fa;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo">
+        <h1 class="demo__title">Selection Menu Component</h1>
+        
+        <div class="demo__section">
+            <h2 class="demo__section-title">Interactive Demo</h2>
+            <p>Click on any item in the menu to select it.</p>
+            
+            <div class="demo__area">
+                <div class="demo__menu-container">
+                    <selection-menu id="demoMenu"></selection-menu>
+                </div>
+                
+                <div class="demo__preview">
+                    <h3 class="demo__preview-title">Selected Item</h3>
+                    <div class="demo__preview-info" id="selectedItemInfo">No item selected</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo__section">
+            <h2 class="demo__section-title">How to Use</h2>
+            <h3>Basic Usage</h3>
+            <pre><code>&lt;selection-menu id="myMenu"&gt;&lt;/selection-menu&gt;
+
+&lt;script type="module"&gt;
+  import './components/selection-menu/SelectionMenu.js';
+  
+  const menu = document.getElementById('myMenu');
+  
+  // Listen for selection changes
+  menu.addEventListener('selection-change', (e) => {
+    console.log('Selected:', e.detail);
+  });
+  
+  // Programmatically select an item
+  menu.setSelectedItem('2.2.1');
+&lt;/script&gt;</code></pre>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menu = document.getElementById('demoMenu');
+            const selectedItemInfo = document.getElementById('selectedItemInfo');
+            
+            // Wait for components to be defined
+            customElements.whenDefined('selection-menu').then(() => {
+                menu.addEventListener('change', (e) => {
+                    const { selectedId, selectedText } = e.detail;
+                    selectedItemInfo.textContent = `ID: ${selectedId}\nText: ${selectedText}`;
+                });
+                
+                // Optional: Programmatically select an item after a delay
+                setTimeout(() => {
+                    menu.value = '2.2.1';
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>

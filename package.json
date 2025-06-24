@@ -1,0 +1,92 @@
+{
+  "name": "mad-js-dev-generic-webcomponents",
+  "version": "1.0.0",
+  "homepage": "https://[YOUR_GITHUB_USERNAME].github.io/mad-js-dev-generic-webcomponents",
+  "description": "A collection of reusable web components that work across different frameworks",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/[YOUR_GITHUB_USERNAME]/mad-js-dev-generic-webcomponents.git"
+  },
+  "keywords": ["webcomponents", "react", "vue", "ui", "components"],
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "docs": "vite --mode docs",
+    "start": "vite preview",
+    "build": "vite build && vite build --mode docs && npm run build:types",
+    "build:lib": "vite build",
+    "build:docs": "vite build --mode docs",
+    "build:types": "tsc --emitDeclarationOnly --declaration --allowJs --esModuleInterop --outDir dist",
+    "preview": "vite preview",
+    "prepare": "npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "npm run build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  },
+  "keywords": [
+    "webcomponents",
+    "custom-elements",
+    "collapsible"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0",
+    "vue": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1",
+    "@babel/plugin-transform-runtime": "^7.27.4",
+    "@babel/preset-env": "^7.27.2",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.56",
+    "@types/react-dom": "^18.2.19",
+    "babel-jest": "^30.0.0",
+    "gh-pages": "^6.3.0",
+    "jest": "^30.0.0",
+    "jest-environment-jsdom": "^30.0.0",
+    "terser": "^5.43.1",
+    "typescript": "^5.3.3",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^3.7.1"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.5.2",
+    "node-fetch": "^3.3.2"
+  }
+}

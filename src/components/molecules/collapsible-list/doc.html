@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collapsible List - Component Documentation</title>
+    <script type="module">
+        import { CollapsibleList } from './CollapsibleList.js';
+        import { CollapsibleItem } from '../collapsible-item/CollapsibleItem.js';
+
+        // Define the custom elements
+        if (!customElements.get('collapsible-list')) {
+            customElements.define('collapsible-list', CollapsibleList);
+        }
+        if (!customElements.get('collapsible-item')) {
+            customElements.define('collapsible-item', CollapsibleItem);
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .example {
+            margin-bottom: 3rem;
+            border: 1px solid #eee;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .demo {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        .controls {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #e8f4fd;
+            border-radius: 4px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Collapsible List Component</h1>
+    <p>A flexible, accessible, and customizable collapsible list component built with Web Components.</p>
+    
+    <h2>Features</h2>
+    <ul class="feature-list">
+        <li>Fully keyboard accessible</li>
+        <li>Supports nested lists</li>
+        <li>Animated transitions</li>
+        <li>Customizable styling</li>
+        <li>Reverse heading layout option</li>
+        <li>Works with dynamic content</li>
+        <li>No external dependencies</li>
+        <li>Small bundle size</li>
+    </ul>
+    
+    <h2>Basic Usage</h2>
+    <div class="example">
+        <h3 class="example-title">Simple Collapsible List</h3>
+        <div class="demo">
+            <collapsible-list aria-label="Sample List">
+                <collapsible-item>
+                    <div slot="header">First Item</div>
+                </collapsible-item>
+                <collapsible-item>
+                    <div slot="header">Second Item</div>
+                </collapsible-item>
+                <collapsible-item>
+                    <div slot="header">Third Item</div>
+                </collapsible-item>
+            </collapsible-list>
+        </div>
+        
+        <h4>Code:</h4>
+        <pre><code>&lt;collapsible-list aria-label="Sample List"&gt;
+    &lt;collapsible-item&gt;
+        &lt;div slot="header"&gt;First Item&lt;/div&gt;
+        &lt;div&gt;Content for first item&lt;/div&gt;
+    &lt;/collapsible-item&gt;
+    &lt;collapsible-item&gt;
+        &lt;div slot="header"&gt;Second Item&lt;/div&gt;
+        &lt;div&gt;Content for second item&lt;/div&gt;
+    &lt;/collapsible-item&gt;
+    &lt;collapsible-item&gt;
+        &lt;div slot="header"&gt;Third Item&lt;/div&gt;
+        &lt;div&gt;Content for third item&lt;/div&gt;
+    &lt;/collapsible-item&gt;
+&lt;/collapsible-list&gt;</code></pre>
+    </div>
+    
+    <h2>Nested Lists</h2>
+    <div class="example">
+        <h3 class="example-title">Nested Collapsible Lists</h3>
+        <div class="demo">
+            <collapsible-list aria-label="Nested List Example">
+                <collapsible-item>
+                    <div slot="header">Parent Item 1</div>
+                    <collapsible-list>
+                        <collapsible-item>
+                            <div slot="header">Child 1.1</div>
+                        </collapsible-item>
+                        <collapsible-item>
+                            <div slot="header">Child 1.2</div>
+                        </collapsible-item>
+                    </collapsible-list>
+                </collapsible-item>
+                <collapsible-item>
+                    <div slot="header">Parent Item 2</div>
+                    <collapsible-list>
+                        <collapsible-item>
+                            <div slot="header">Child 2.1</div>
+                        </collapsible-item>
+                        <collapsible-item>
+                            <div slot="header">Child 2.2</div>
+                        </collapsible-item>
+                        <collapsible-item>
+                            <div slot="header">Child 2.3</div>
+                        </collapsible-item>
+                    </collapsible-list>
+                </collapsible-item>
+            </collapsible-list>
+        </div>
+    </div>
+    
+    <h2>Reverse Heading Layout</h2>
+    <div class="example">
+        <h3 class="example-title">With Reverse Heading</h3>
+        <div class="controls">
+            <button id="toggleReverse">Toggle Reverse Heading</button>
+        </div>
+        <div class="demo">
+            <collapsible-list id="reverseDemo" aria-label="Reverse Heading Example">
+                <collapsible-item>
+                    <div slot="header">First Item</div>
+                    <collapsible-list>
+                        <collapsible-item>
+                            <div slot="header">Nested 1.1</div>
+                        </collapsible-item>
+                        <collapsible-item>
+                            <div slot="header">Nested 1.2</div>
+                        </collapsible-item>
+                    </collapsible-list>
+                </collapsible-item>
+                <collapsible-item>
+                    <div slot="header">Second Item</div>
+                </collapsible-item>
+                <collapsible-item>
+                    <div slot="header">Third Item</div>
+                </collapsible-item>
+            </collapsible-list>
+        </div>
+    </div>
+    
+    <h2>Pre-expanded Items</h2>
+    <div class="example">
+        <h3 class="example-title">Items Expanded by Default</h3>
+        <div class="demo">
+            <collapsible-list aria-label="Pre-expanded Example">
+                <collapsible-item expanded>
+                    <div slot="header">Expanded Item</div>
+                    <collapsible-list>
+                        <collapsible-item>
+                            <div slot="header">Nested Item 1</div>
+                        </collapsible-item>
+                        <collapsible-item>
+                            <div slot="header">Nested Item 2</div>
+                        </collapsible-item>
+                    </collapsible-list>
+                </collapsible-item>
+                <collapsible-item>
+                    <div slot="header">Collapsed Item</div>
+                </collapsible-item>
+            </collapsible-list>
+        </div>
+    </div>
+    
+    <h2>Dynamic Content</h2>
+    <div class="example">
+        <h3 class="example-title">Add/Remove Items Dynamically</h3>
+        <div class="controls">
+            <button id="addItem">Add Item</button>
+            <button id="removeItem">Remove Last Item</button>
+        </div>
+        <div class="demo">
+            <collapsible-list id="dynamicList" aria-label="Dynamic List">
+                <collapsible-item>
+                    <div slot="header">Initial Item</div>
+                </collapsible-item>
+            </collapsible-list>
+        </div>
+    </div>
+    
+    <h2>Accessibility</h2>
+    <p>The component implements proper ARIA attributes and keyboard navigation:</p>
+    <ul>
+        <li>Uses <code>role="list"</code> and <code>role="listitem"</code> for proper semantics</li>
+        <li>Implements keyboard navigation with arrow keys, Home, and End</li>
+        <li>Manages <code>aria-expanded</code> and <code>aria-controls</code> for screen readers</li>
+        <li>Follows WAI-ARIA Authoring Practices for accordions and disclosures</li>
+    </ul>
+    
+    <h2>Customization</h2>
+    <p>You can customize the appearance using CSS custom properties:</p>
+    <pre><code>collapsible-list {
+    --indent-size: 1.5rem;  /* Controls the indentation of nested lists */
+    --toggle-size: 24px;    /* Size of the toggle button */
+    --toggle-margin: 0 8px 0 0;  /* Margin around the toggle button */
+    --transition-duration: 0.2s;  /* Animation duration */
+}
+
+/* Custom styles for the header */
+.collapsible-item__header {
+    /* Your custom styles here */
+}
+
+/* Custom styles for the toggle button */
+.collapsible-item__toggle {
+    /* Your custom styles here */
+}</code></pre>
+    
+    <h2>Browser Support</h2>
+    <p>The component works in all modern browsers that support Web Components (Chrome, Firefox, Safari, Edge). For older browsers, you might need to include the Web Components polyfills.</p>
+    
+    <script type="module">
+        // Import the components using Vite's import syntax
+        import { CollapsibleList } from './CollapsibleList.js';
+        import { CollapsibleItem } from '../collapsible-item/CollapsibleItem.js';
+        
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Define the custom elements if not already defined
+            if (!customElements.get('collapsible-list')) {
+                customElements.define('collapsible-list', CollapsibleList);
+            }
+            if (!customElements.get('collapsible-item')) {
+                customElements.define('collapsible-item', CollapsibleItem);
+            }
+            
+            // Initialize any interactive elements after components are defined
+            initDemo();
+        });
+        
+        function initDemo() {
+            // Toggle reverse heading
+            const toggleBtn = document.getElementById('toggleReverse');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    const list = document.getElementById('reverseDemo');
+                    if (list) {
+                        list.toggleAttribute('reverse-heading');
+                    }
+                });
+            }
+            
+            // Dynamic content demo
+            let itemCount = 1;
+            const dynamicList = document.getElementById('dynamicList');
+            const addBtn = document.getElementById('addItem');
+            const removeBtn = document.getElementById('removeItem');
+            
+            if (addBtn && dynamicList) {
+                addBtn.addEventListener('click', () => {
+                    itemCount++;
+                    const newItem = document.createElement('collapsible-item');
+                    newItem.textContent = `Dynamic Item ${itemCount}`;
+                    dynamicList.appendChild(newItem);
+                });
+            }
+            
+            if (removeBtn && dynamicList) {
+                removeBtn.addEventListener('click', () => {
+                    const items = dynamicList.querySelectorAll('collapsible-item');
+                    if (items.length > 1) {  // Keep at least one item
+                        dynamicList.removeChild(items[items.length - 1]);
+                        if (itemCount > 1) itemCount--;
+                    }
+                });
+            }
+        }
+        
+        // Toggle reverse heading
+        document.getElementById('toggleReverse')?.addEventListener('click', () => {
+            const list = document.getElementById('reverseDemo');
+            if (list.hasAttribute('reverse-heading')) {
+                list.removeAttribute('reverse-heading');
+            } else {
+                list.setAttribute('reverse-heading', '');
+            }
+        });
+        
+        // Dynamic content demo
+        let itemCount = 1;
+        const dynamicList = document.getElementById('dynamicList');
+        
+        document.getElementById('addItem')?.addEventListener('click', () => {
+            itemCount++;
+            const newItem = document.createElement('collapsible-item');
+            newItem.textContent = `Dynamic Item ${itemCount}`;
+            dynamicList.appendChild(newItem);
+        });
+        
+        document.getElementById('removeItem')?.addEventListener('click', () => {
+            const items = dynamicList.querySelectorAll('collapsible-item');
+            if (items.length > 1) {  // Keep at least one item
+                dynamicList.removeChild(items[items.length - 1]);
+                if (itemCount > 1) itemCount--;
+            }
+        });
+    </script>
+</body>
+</html>
