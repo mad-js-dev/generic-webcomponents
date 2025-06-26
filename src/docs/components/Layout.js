@@ -131,7 +131,12 @@ export default class DocsLayout extends HTMLElement {
                 <span class="nav-category organism">Organism</span>
               </a>
             </li>
-
+            <li class="nav-item">
+              <a href="#/image-collection" class="nav-link" data-route="image-collection">
+                Image Collection
+                <span class="nav-category organism">Organism</span>
+              </a>
+            </li>
             <li class="nav-item">
               <a href="#/product-layout" class="nav-link" data-route="product-layout">
                 Product Layout

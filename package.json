@@ -1,24 +1,35 @@
 {
-  "name": "mad-js-dev-generic-webcomponents",
+  "name": "@mad-js-dev/generic-webcomponents",
   "version": "1.0.0",
-  "homepage": "https://[YOUR_GITHUB_USERNAME].github.io/mad-js-dev-generic-webcomponents",
   "description": "A collection of reusable web components that work across different frameworks",
   "repository": {
     "type": "git",
-    "url": "https://github.com/[YOUR_GITHUB_USERNAME]/mad-js-dev-generic-webcomponents.git"
+    "url": "https://github.com/mad-js-dev/generic-webcomponents.git"
   },
-  "keywords": ["webcomponents", "react", "vue", "ui", "components"],
-  "main": "dist/index.js",
+  "homepage": "https://mad-js-dev.github.io/generic-webcomponents",
+  "keywords": [
+    "webcomponents",
+    "react",
+    "vue",
+    "ui",
+    "components",
+    "custom-elements",
+    "collapsible"
+  ],
+  "main": "dist/index.umd.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "browser": "dist/index.umd.js",
   "scripts": {
-    "dev": "vite",
-    "docs": "vite --mode docs",
-    "start": "vite preview",
+    "dev": "vite --config vite.config.js",
+    "docs": "vite --config vite.config.js --mode docs",
+    "start": "vite preview --config vite.config.js",
     "build": "vite build && vite build --mode docs && npm run build:types",
     "build:lib": "vite build",
     "build:docs": "vite build --mode docs",
     "build:types": "tsc --emitDeclarationOnly --declaration --allowJs --esModuleInterop --outDir dist",
-    "preview": "vite preview",
+    "preview": "vite preview --config vite.config.js",
     "prepare": "npm run build",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -29,24 +40,15 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": [
-      "@testing-library/jest-dom"
-    ],
+    "setupFilesAfterEnv": ["@testing-library/jest-dom"],
     "transform": {
       "^.+\\.js$": "babel-jest"
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     },
-    "testMatch": [
-      "**/__tests__/**/*.test.js"
-    ]
+    "testMatch": ["**/__tests__/**/*.test.js"]
   },
-  "keywords": [
-    "webcomponents",
-    "custom-elements",
-    "collapsible"
-  ],
   "author": "",
   "license": "MIT",
   "peerDependencies": {
@@ -66,7 +68,6 @@
     }
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1",
     "@babel/plugin-transform-runtime": "^7.27.4",
     "@babel/preset-env": "^7.27.2",
     "@testing-library/dom": "^10.4.0",

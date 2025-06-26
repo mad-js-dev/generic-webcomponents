@@ -37,21 +37,19 @@ export class CollapsibleItem extends HTMLElement {
       }
     }
     
-    // Ensure styles and attributes are applied after initial render
-    requestAnimationFrame(() => {
-      this._updateToggleVisibility();
-      this._updateReverseHeading();
-      this._updateAriaExpanded();
-      
-      // Update toggle state based on expanded status
-      if (this._toggleElement) {
-        if (this.expanded) {
-          this._toggleElement.classList.add('collapsible-item__toggle--expanded');
-        } else {
-          this._toggleElement.classList.remove('collapsible-item__toggle--expanded');
-        }
+    // Update styles and attributes immediately after initialization
+    this._updateToggleVisibility();
+    this._updateReverseHeading();
+    this._updateAriaExpanded();
+    
+    // Update toggle state based on expanded status
+    if (this._toggleElement) {
+      if (this.expanded) {
+        this._toggleElement.classList.add('collapsible-item__toggle--expanded');
+      } else {
+        this._toggleElement.classList.remove('collapsible-item__toggle--expanded');
       }
-    });
+    }
   }
 
   _initializeComponent() {
@@ -135,9 +133,6 @@ export class CollapsibleItem extends HTMLElement {
         display: block;
         margin: 0;
         padding: 0;
-        --toggle-size: 0;
-        --toggle-margin: 0;
-        --toggle-padding: 0;
       }
 
       .collapsible-item {
@@ -167,6 +162,7 @@ export class CollapsibleItem extends HTMLElement {
         height: 24px;
         flex-shrink: 0;
         margin-right: 8px;
+        
       }
       
       .collapsible-item__toggle {
@@ -184,7 +180,6 @@ export class CollapsibleItem extends HTMLElement {
         font-size: 0.8em;
         line-height: 1;
         color: inherit;
-        
       }
       
       .collapsible-item__toggle--hidden {
@@ -220,6 +215,9 @@ export class CollapsibleItem extends HTMLElement {
         padding: 0;
         display: block;
         overflow: hidden;
+      }
+      collapsible-item > collapsible-list {
+        padding-left: 1rem;
       }
     `;
     

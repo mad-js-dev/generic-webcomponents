@@ -87,6 +87,12 @@ export default class HomePage extends HTMLElement {
             <p>Interactive selection menu with collapsible items.</p>
             <a href="#/selection-menu">View Documentation →</a>
           </div>
+          
+          <div class="component-card">
+            <h3>Image Collection</h3>
+            <p>Responsive image gallery with lightbox functionality.</p>
+            <a href="#/image-collection">View Documentation →</a>
+          </div>
         </div>
       </div>
     `;
