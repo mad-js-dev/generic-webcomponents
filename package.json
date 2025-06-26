@@ -1,10 +1,10 @@
 {
   "name": "@mad-js-dev/generic-webcomponents",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A collection of reusable web components that work across different frameworks",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mad-js-dev/generic-webcomponents.git"
+    "url": "git+https://github.com/mad-js-dev/generic-webcomponents.git"
   },
   "homepage": "https://mad-js-dev.github.io/generic-webcomponents",
   "keywords": [
@@ -15,6 +15,9 @@
     "components",
     "custom-elements",
     "collapsible"
+  ],
+  "files": [
+    "dist"
   ],
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
@@ -40,14 +43,18 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["@testing-library/jest-dom"],
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom"
+    ],
     "transform": {
       "^.+\\.js$": "babel-jest"
     },
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     },
-    "testMatch": ["**/__tests__/**/*.test.js"]
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   },
   "author": "",
   "license": "MIT",
