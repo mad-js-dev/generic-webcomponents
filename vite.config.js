@@ -41,7 +41,7 @@ export default defineConfig(({ command, mode }) => {
       build: {
         outDir: 'dist',
         lib: {
-          entry: resolve(__dirname, 'src/docs/main.js'),
+          entry: resolve(__dirname, 'src/index.js'),
           name: 'GenericWebComponents',
           fileName: (format) => `index.${format}.js`,
           formats: ['es', 'umd'],
