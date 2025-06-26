@@ -10,7 +10,7 @@ export default defineConfig(({ command, mode }) => {
   const isBuild = command === 'build';
   const isDocs = mode === 'docs';
 
-  // Base config for both library and docs
+  // Base config for library
   const baseConfig = {
     root: './',
     publicDir: 'public',
@@ -20,6 +20,12 @@ export default defineConfig(({ command, mode }) => {
       },
     },
   };
+
+  // Skip docs build for now
+  if (isDocs) {
+    console.log('Documentation build is currently disabled');
+    return { ...baseConfig, build: { emptyOutDir: false } };
+  }
 
   // Library build config
   if (isBuild && !isDocs) {
