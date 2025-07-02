@@ -22,21 +22,18 @@ export default class ImageCollectionPage extends HTMLElement {
       // Use the locally imported images
       this.images = localImages;
       
-      // Ensure collapsible components are loaded
-      await Promise.all([
-        customElements.whenDefined('collapsible-item'),
-        customElements.whenDefined('collapsible-list')
-      ]);
+      // Ensure the component is defined
+      await customElements.whenDefined('image-collection');
       
       // Update the collection with local images
       if (demoCollection) {
         demoCollection.images = this.images;
         
-        // Force update to ensure the first item is expanded
+        // Expand the first item by default
         setTimeout(() => {
-          const firstItem = demoCollection.shadowRoot?.querySelector('collapsible-item');
+          const firstItem = demoCollection.shadowRoot?.querySelector('li[is="collapsible-item"]');
           if (firstItem) {
-            firstItem.expanded = true;
+            firstItem.setAttribute('expanded', '');
           }
         }, 100);
       }
@@ -81,14 +78,24 @@ export default class ImageCollectionPage extends HTMLElement {
           padding: 1.5rem;
           margin: 1.5rem 0;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          overflow: hidden;
+        }
+        
+        .demo-container {
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 1rem;
+          background: #f8fafc;
         }
         
         pre {
-          background: #f8f9fa;
+          background: #2d2d2d;
+          color: #f8f8f2;
           padding: 1rem;
           border-radius: 6px;
           overflow-x: auto;
           margin: 1rem 0;
+          border: 1px solid #444;
         }
         
         code {
@@ -99,7 +106,12 @@ export default class ImageCollectionPage extends HTMLElement {
     `;
 
     const demoHTML = `
-      <image-collection id="demoCollection"></image-collection>
+      <div style="max-width: 800px; margin: 0 auto;">
+        <p>Click on an image title to expand it. The component automatically handles closing other items when a new one is opened.</p>
+        <div class="demo-container">
+          <image-collection id="demoCollection"></image-collection>
+        </div>
+      </div>
     `;
 
     const usageExample = `
@@ -125,30 +137,43 @@ export default class ImageCollectionPage extends HTMLElement {
       <ul>
         <li><strong>images</strong> (Array): Array of image objects with the following structure:
           <ul>
-            <li><strong>title</strong> (String): Title of the image</li>
-            <li><strong>description</strong> (String, optional): Description of the image</li>
-            <li><strong>src</strong> (String): URL to the image (required)</li>
-            <li><strong>alt</strong> (String): Alt text for accessibility</li>
+            <li><strong>title</strong> (String): Title of the image (displayed in the collapsible header)</li>
+            <li><strong>description</strong> (String, optional): Description of the image (displayed in the expanded content area)</li>
+            <li><strong>url</strong> (String): URL to the image (required)</li>
+            <li><strong>alt</strong> (String, optional): Alt text for accessibility</li>
+            <li><strong>width</strong> (Number, optional): Width of the image in pixels</li>
+            <li><strong>height</strong> (Number, optional): Height of the image in pixels</li>
           </ul>
         </li>
-        <li><strong>lastOpenedIndex</strong> (Number, read-only): Index of the currently expanded item, or -1 if none</li>
+        <li><strong>_currentOpenIndex</strong> (Number, private): Index of the currently expanded item, or 0 (first item) by default</li>
       </ul>
       
       <h3>Methods</h3>
       <ul>
-        <li><strong>refresh()</strong>: Re-renders the component with the current images</li>
-        <li><strong>getOpenItemIndex()</strong>: Returns the index of the currently expanded item, or -1 if none</li>
-        <li><strong>openItem(index)</strong>: Expands the item at the specified index and collapses all others</li>
+        <li><strong>render()</strong>: Re-renders the component with the current images</li>
+        <li><strong>connectedCallback()</strong>: Lifecycle method called when the element is added to the DOM</li>
+        <li><strong>disconnectedCallback()</strong>: Lifecycle method called when the element is removed from the DOM</li>
+        <li><strong>_handleToggle(event)</strong>: Internal method that handles the toggle events from collapsible items</li>
       </ul>
       
       <h3>Events</h3>
       <ul>
-        <li><strong>item-selected</strong>: Fired when an item is selected. The event detail contains:
+        <li><strong>toggle</strong>: Fired when an item's expanded state changes. The event detail contains:
           <ul>
-            <li><strong>index</strong> (Number): The index of the selected item</li>
-            <li><strong>item</strong> (HTMLElement): The selected collapsible-item element</li>
+            <li><strong>index</strong> (Number): The index of the toggled item</li>
+            <li><strong>expanded</strong> (Boolean): Whether the item is now expanded</li>
+            <li><strong>target</strong> (HTMLElement): The collapsible item element that was toggled</li>
           </ul>
         </li>
+      </ul>
+      
+      <h3>Styling</h3>
+      <p>The component uses the following CSS custom properties for styling:</p>
+      <ul>
+        <li><strong>--collapsible-bg</strong>: Background color of the collapsible items</li>
+        <li><strong>--collapsible-hover-bg</strong>: Background color on hover</li>
+        <li><strong>--border-color</strong>: Border color of the items</li>
+        <li><strong>--transition-speed</strong>: Transition speed for expand/collapse animations</li>
       </ul>
     `;
 
@@ -158,7 +183,8 @@ export default class ImageCollectionPage extends HTMLElement {
         <h1>Image Collection</h1>
         
         <div class="description">
-          A component that displays a collection of images in a collapsible list, with only one image expanded at a time.
+          A collapsible image gallery component that displays a collection of images with their titles and descriptions. 
+          Only one image can be expanded at a time, and the component handles smooth transitions between expanded states.
         </div>
         
         <div class="section">
@@ -184,11 +210,6 @@ export default class ImageCollectionPage extends HTMLElement {
     const demoCollection = this.shadowRoot.getElementById('demoCollection');
     if (demoCollection) {
       demoCollection.images = this.images;
-    }
-    
-    // Import the component if not already loaded
-    if (!customElements.get('image-collection')) {
-      import('../../components/organisms/image-collection/ImageCollection.js');
     }
   }
 }
