@@ -1,5 +1,5 @@
 import '../../components/molecules/collapsible-list/CollapsibleList.js';
-import '../../components/atoms/collapsible-item/CollapsibleItem.js';
+import '../../components/molecules/collapsible-item/CollapsibleItem.js';
 
 export default class CollapsibleListPage extends HTMLElement {
   constructor() {
@@ -398,7 +398,7 @@ export default class CollapsibleListPage extends HTMLElement {
     }
     
     if (!customElements.get('collapsible-item')) {
-      import('../../components/atoms/collapsible-item/CollapsibleItem.js');
+      import('../../components/molecules/collapsible-item/CollapsibleItem.js');
     }
   }
 }

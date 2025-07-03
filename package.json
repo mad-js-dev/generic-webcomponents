@@ -17,12 +17,24 @@
     "collapsible"
   ],
   "files": [
-    "dist"
+    "dist",
+    "types"
   ],
+  "types": "./types/index.d.ts",
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
-  "types": "dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    },
+    "./components/icon-label": {
+      "types": "./types/components/icon-label.d.ts",
+      "import": "./src/components/atoms/icon-label/IconLabel.js"
+    }
+  },
   "browser": "dist/index.umd.js",
   "scripts": {
     "dev": "vite --config vite.config.js",

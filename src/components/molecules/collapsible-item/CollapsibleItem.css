@@ -1,0 +1,67 @@
+/* Base styles for the component */
+li[is="collapsible-item"] {
+  --collapsible-item-padding: 0.5rem 0.5rem 0 1.5rem;
+  display: block;
+  margin: 0 0 0.5rem 0;
+  list-style: none;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+li[is="collapsible-item"] li[is="collapsible-item"] {
+    margin-left: 0;
+}
+
+/* Elements */
+.collapsible-item__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  margin: 0;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.collapsible-item__header:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.collapsible-item__icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.collapsible-item__label {
+  display: inline-block;
+}
+
+.collapsible-item__content {
+  padding: var(--collapsible-item-padding);
+  max-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: max-height 0.3s ease-out;
+  will-change: max-height;
+}
+
+/* Modifiers */
+li[is="collapsible-item"].collapsible-item--expanded .collapsible-item__content {
+  max-height: 5000px; /* Adjust based on your content */
+  transition: max-height 0.5s ease-in;
+}
+
+li[is="collapsible-item"].collapsible-item--nested {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  border: none;
+  border-radius: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+li[is="collapsible-item"].collapsible-item--no-padding .collapsible-item__content,
+li[is="collapsible-item"] .collapsible-item--nested {
+  padding-left: 0;
+  padding-right: 0;
+}

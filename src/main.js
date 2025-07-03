@@ -9,13 +9,15 @@ import './docs/pages/CollapsibleItemPage.js';
 import './docs/pages/SelectionMenuPage.js';
 import './docs/pages/ImageCollectionPage.js';
 import './docs/pages/ProductLayoutPage';
+import './docs/pages/IconLabelPage';
 
 // Import component definitions
 import { CollapsibleList } from './components/molecules/collapsible-list/CollapsibleList.js';
-import { CollapsibleItem } from './components/atoms/collapsible-item/CollapsibleItem.js';
+import { CollapsibleItem } from './components/molecules/collapsible-item/CollapsibleItem.js';
 import { SelectionMenu } from './components/organisms/selection-menu/SelectionMenu.js';
 import { ImageCollection } from './components/organisms/image-collection/ImageCollection.js';
 import { ProductLayout } from './components/templates/product-layout/ProductLayout.js';
+import { IconLabel } from './components/atoms/icon-label/IconLabel';
 
 // Define custom elements if they haven't been defined yet
 if (!customElements.get('collapsible-list')) {
@@ -33,6 +35,9 @@ if (!customElements.get('image-collection')) {
 if (!customElements.get('product-layout')) {
   customElements.define('product-layout', ProductLayout);
 }
+if (!customElements.get('icon-label')) {
+  customElements.define('icon-label', IconLabel);
+}
 
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -46,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <home-page path="/"></home-page>
                 <collapsible-list-page path="/collapsible-list"></collapsible-list-page>
                 <collapsible-item-page path="/collapsible-item"></collapsible-item-page>
+                <icon-label-page path="/icon-label"></icon-label-page>
                 <selection-menu-page path="/selection-menu"></selection-menu-page>
                 <image-collection-page path="/image-collection"></image-collection-page>
                 <product-layout-page path="/product-layout"></product-layout-page>

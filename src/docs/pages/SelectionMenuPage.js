@@ -5,16 +5,30 @@ export default class SelectionMenuPage extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this._menuData = [
-      { id: '1', name: 'Item 1' },
       { 
-        id: '2', 
-        name: 'Item 2',
+        id: 'folder1', 
+        name: 'Documents',
         children: [
-          { id: '2.1', name: 'Subitem 2.1' },
-          { id: '2.2', name: 'Subitem 2.2' }
+          { id: 'doc1', name: 'Report.pdf'},
+          { id: 'doc2', name: 'Presentation.pdf' }
         ]
       },
-      { id: '3', name: 'Item 3' }
+      { 
+        id: 'folder2',
+        name: 'Images',
+        children: [
+          { 
+            id: 'subfolder1',
+            name: 'Vacation',
+            children: [
+              { id: 'img1', name: 'Beach.jpg' },
+              { id: 'img2', name: 'Mountain.jpg' }
+            ]
+          },
+          { id: 'img3', name: 'Profile.png' }
+        ]
+      },
+      { id: 'file1', name: 'Notes.txt' }
     ];
   }
 
@@ -76,17 +90,18 @@ export default class SelectionMenuPage extends HTMLElement {
     const jsonPreview = this.shadowRoot.querySelector('#jsonPreview');
     
     if (menu) {
-      menu.data = this._menuData;
+      // Set the items as a JSON string to demonstrate attribute usage
+      menu.setAttribute('items', JSON.stringify(this._menuData));
       
       menu.addEventListener('item-selected', (e) => {
-        preview.textContent = 'Selected: ' + e.detail.item.name + ' (ID: ' + e.detail.id + ')';
+        preview.textContent = `Selected: ${e.detail.name} (ID: ${e.detail.id})`;
         jsonPreview.textContent = JSON.stringify(e.detail, null, 2);
       });
       
       const selectBtn = this.shadowRoot.querySelector('#selectBtn');
       if (selectBtn) {
         selectBtn.addEventListener('click', () => {
-          menu.setSelectedItem('2.1');
+          menu.selected = 'img1'; // Select Beach.jpg
         });
       }
     }
@@ -186,7 +201,7 @@ export default class SelectionMenuPage extends HTMLElement {
     // Add title and description
     pageContainer.appendChild(this.createElement('h1', { textContent: 'Selection Menu' }));
     pageContainer.appendChild(this.createElement('p', { 
-      textContent: 'An interactive selection menu built with collapsible items that supports nested data and custom events.'
+      textContent: 'A fully accessible, interactive selection menu built with collapsible items. Supports nested data structures, custom events, keyboard navigation, and programmatic control.'
     }));
 
     // Add installation section
@@ -236,11 +251,14 @@ export default class SelectionMenuPage extends HTMLElement {
 
     // Add features section
     const features = [
-      'Supports nested data structures',
-      'Custom events with full item data',
-      'Programmatic selection',
-      'Responsive design',
-      'Keyboard navigation'
+      '✅ Supports deeply nested data structures',
+      '🎯 Programmatic selection and state management',
+      '⌨️ Full keyboard navigation support',
+      '🎨 Customizable appearance through CSS variables',
+      '📱 Responsive and touch-friendly',
+      '🔔 Custom events for all interactions',
+      '⚡ Optimized for performance with large datasets',
+      '♿ Built with accessibility in mind (ARIA attributes)'
     ];
     
     pageContainer.appendChild(this.createElement('h2', { textContent: 'Features' }));
@@ -256,65 +274,128 @@ export default class SelectionMenuPage extends HTMLElement {
     // Properties table
     pageContainer.appendChild(this.createElement('h3', { textContent: 'Properties' }));
     const properties = [
-      ['data', 'Array | String', 'Menu items data (can be an array or JSON string)'],
-      ['value', 'String', 'Currently selected item ID'],
-      ['block-events-on-parent', 'Boolean', 'If true, prevents selection of items that have children']
+      ['items', 'String', 'JSON string representing the menu items structure'],
+      ['selected', 'String', 'ID of the currently selected item (read/write)'],
+      ['--primary-color', 'CSS Color', 'Main highlight color'],
+      ['--hover-bg', 'CSS Color', 'Background color on hover'],
+      ['--selected-bg', 'CSS Color', 'Background color for selected items'],
+      ['--border-color', 'CSS Color', 'Border color for the container'],
+      ['--text-color', 'CSS Color', 'Main text color']
     ];
     pageContainer.appendChild(this.createTable(['Name', 'Type', 'Description'], properties));
-    
-    // Methods table
-    pageContainer.appendChild(this.createElement('h3', { textContent: 'Methods' }));
-    const methods = [
-      ['setSelectedItem(id)', 'Select an item by ID']
-    ];
-    pageContainer.appendChild(this.createTable(['Name', 'Description'], methods));
     
     // Events table
     pageContainer.appendChild(this.createElement('h3', { textContent: 'Events' }));
     const events = [
-      ['item-selected', 'Triggered when an item is selected', '{ id: string, item: object }']
+      ['item-selected', 'Triggered when a leaf node is selected', '{\n  id: string,      // ID of the selected item\n  item: object,    // The selected item object\n  name: string     // Name of the selected item\n}']
     ];
     pageContainer.appendChild(this.createTable(['Name', 'Description', 'Event Detail'], events));
 
-    // Add examples
+    // Add examples section
     pageContainer.appendChild(this.createElement('h2', { textContent: 'Examples' }));
     
     // Basic usage example
     pageContainer.appendChild(this.createElement('h3', { textContent: 'Basic Usage' }));
     const basicExample = this.createElement('pre');
     basicExample.appendChild(this.createElement('code', {
-      textContent: '<selection-menu id="myMenu"></selection-menu>\n\n' +
-        '<script>\n' +
-        '  const menu = document.querySelector(\'#myMenu\');\n' +
-        '  menu.data = [\n' +
-        '    { id: \'1\', name: \'Item 1\' },\n' +
+      textContent: '<!-- HTML -->\n' +
+        '<selection-menu id="fileExplorer"></selection-menu>\n\n' +
+        '<!-- JavaScript -->\n' +
+        '<script type="module">\n' +
+        '  import \'./path/to/SelectionMenu.js\';\n\n' +
+        '  const menu = document.querySelector(\'#fileExplorer\');\n  \n' +
+        '  // Set menu items with icons and custom data\n' +
+        '  menu.items = [\n' +
         '    { \n' +
-        '      id: \'2\', \n' +
-        '      name: \'Item 2\',\n' +
+        '      id: \'docs\', \n' +
+        '      name: \'Documents\',\n' +
+        '      icon: \'➤\',\n' +
+        '      meta: { type: \'folder\' },\n' +
         '      children: [\n' +
-        '        { id: \'2.1\', name: \'Subitem 2.1\' }\n' +
+        '        { id: \'report\', name: \'Report.pdf\', icon: \'➤\' },\n' +
+        '        { id: \'sheet\', name: \'Budget.xlsx\', icon: \'➤\' }\n' +
         '      ]\n' +
-        '    }\n' +
+        '    },\n' +
+        '    { \n' +
+        '      id: \'images\', \n' +
+        '      name: \'Pictures\',\n' +
+        '      icon: \'🖼️\',\n' +
+        '      meta: { type: \'folder\' },\n' +
+        '      children: [\n' +
+        '        { id: \'vacation\', name: \'Vacation\', icon: \'➤\', children: [\n' +
+        '          { id: \'beach\', name: \'Beach.jpg\', icon: \'➤\' },\n' +
+        '          { id: \'mountain\', name: \'Mountain.jpg\', icon: \'➤\' }\n' +
+        '        ]}\n' +
+        '      ]\n' +
+        '    },\n' +
+        '    { id: \'notes\', name: \'Notes.txt\', icon: \'➤\' }\n' +
         '  ];\n\n' +
+        '  // Listen for selection changes\n' +
         '  menu.addEventListener(\'item-selected\', (e) => {\n' +
-        '    console.log(\'Selected:\', e.detail);\n' +
+        '    const { id, name, item } = e.detail;\n' +
+        '    console.log(`Selected: ${name} (${id})`, item);\n' +
         '  });\n' +
         '</script>'
     }));
     pageContainer.appendChild(basicExample);
     
-    // Programmatic selection example
-    pageContainer.appendChild(this.createElement('h3', { textContent: 'Programmatic Selection' }));
+    // Programmatic control example
+    pageContainer.appendChild(this.createElement('h3', { textContent: 'Programmatic Control' }));
     const progExample = this.createElement('pre');
     progExample.appendChild(this.createElement('code', {
       textContent: '// Select an item by ID\n' +
-        'menu.setSelectedItem(\'2.1\');\n\n' +
+        'menu.selected = \'report\';\n\n' +
+        '// Get the currently selected ID and item\n' +
+        'const selectedId = menu.selected;\n' +
+        'const selectedItem = menu.getSelectedItem(); // Returns the full item object\n\n' +
         '// Clear selection\n' +
-        'menu.setSelectedItem(null);\n\n' +
-        '// Enable/disable parent item selection\n' +
-        'menu.blockEventsOnParent = true; // Disable selection of parent items'
+        'menu.clearSelection();\n\n' +
+        '// Update items dynamically (can be array or JSON string)\n' +
+        'menu.items = [\n' +
+        '  { \n' +
+        '    id: \'recent\', \n' +
+        '    name: \'Recent\',\n' +
+        '    icon: \'🕒\',\n' +
+        '    children: [\n' +
+        '      { id: \'doc1\', name: \'Document1.docx\', icon: \'📄\' },\n' +
+        '      { id: \'img1\', name: \'Photo.jpg\', icon: \'🖼️\' }\n' +
+        '    ]\n' +
+        '  },\n' +
+        '  { id: \'trash\', name: \'Trash\', icon: \'🗑️\' }\n' +
+        '];\n\n' +
+        '// Expand/Collapse items programmatically\n' +
+        'const itemElement = menu.getItemElement(\'recent\');\n' +
+        'if (itemElement) {\n' +
+        '  itemElement.expanded = true; // Expand the item\n' +
+        '  itemElement.scrollIntoView({ behavior: \'smooth\' });\n' +
+        '}\n\n' +
+        '// Listen for expand/collapse events\n' +
+        'menu.addEventListener(\'toggle\', (e) => {\n' +
+        '  console.log(`Item ${e.detail.id} is now ${e.detail.expanded ? \'expanded\' : \'collapsed\'}`);\n' +
+        '});'
     }));
     pageContainer.appendChild(progExample);
+    
+    // Add accessibility section
+    pageContainer.appendChild(this.createElement('h2', { textContent: 'Accessibility' }));
+    pageContainer.appendChild(this.createElement('p', {
+      textContent: 'The SelectionMenu is built with accessibility in mind and includes the following features:'
+    }));
+    
+    const a11yFeatures = [
+      '✅ Keyboard navigation with arrow keys, Home, End, and type-ahead',
+      '✅ Proper ARIA attributes for screen readers',
+      '✅ Focus management',
+      '✅ High contrast support',
+      '✅ Proper heading structure',
+      '✅ Screen reader announcements'
+    ];
+    
+    const a11yList = this.createElement('ul');
+    a11yFeatures.forEach(feature => {
+      a11yList.appendChild(this.createElement('li', { textContent: feature }));
+    });
+    pageContainer.appendChild(a11yList);
 
     // Add everything to shadow root
     this.shadowRoot.appendChild(style);

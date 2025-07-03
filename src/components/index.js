@@ -1,6 +1,6 @@
 // Core components
 export * from './molecules/collapsible-list/CollapsibleList.js';
-export * from './atoms/collapsible-item/CollapsibleItem.js';
+export * from './molecules/collapsible-item/CollapsibleItem.js';
 
 // Additional components (dynamically imported when needed)
 let additionalComponents = {};

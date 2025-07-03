@@ -1,225 +1,384 @@
 /**
  * SelectionMenu Component
- * A custom element that creates a selectable menu using collapsible-list components
+ * A collapsible menu that allows selection of leaf nodes using CollapsibleItem
+ * 
+ * @fires item-selected - Dispatched when a leaf node is selected
+ * @property {string} items - JSON string representing the menu items structure
+ * @property {string} selected - ID of the currently selected item
  */
 
 export class SelectionMenu extends HTMLElement {
   static get observedAttributes() {
-    return ['value', 'data', 'block-events-on-parent', 'reverse-heading'];
+    return ['items', 'selected'];
   }
 
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this._items = [];
     this._selectedId = null;
-    this._data = [];
-    this._blockEventsOnParent = false;
-    this._reverseHeading = true;
+    this._boundOnItemClick = this._onItemClick.bind(this);
+    
+    // Import the CollapsibleItem component
+    import('../../molecules/collapsible-item/CollapsibleItem.js');
   }
 
   connectedCallback() {
-    this.render();
-    this.setupEventListeners();
+    this._render();
+  }
+
+  disconnectedCallback() {
+    this._removeEventListeners();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
 
     switch (name) {
-      case 'data':
-        this.data = newValue ? JSON.parse(newValue) : [];
+      case 'items':
+        this._items = newValue ? JSON.parse(newValue) : [];
+        this._render();
         break;
-      case 'value':
-        this.setSelectedItem(newValue);
-        break;
-      case 'block-events-on-parent':
-        this.blockEventsOnParent = newValue !== null;
-        break;
-      case 'reverse-heading':
-        this.reverseHeading = newValue !== 'false';
+      case 'selected':
+        this._selectedId = newValue;
+        this._updateSelectedState();
         break;
     }
   }
 
-  render() {
-    // Clear the shadow root
-    this.shadowRoot.innerHTML = '';
+  get items() {
+    return JSON.stringify(this._items);
+  }
+
+  set items(value) {
+    this._items = value ? JSON.parse(value) : [];
+    this._render();
+  }
+
+  get selected() {
+    return this._selectedId;
+  }
+
+  set selected(value) {
+    if (this._selectedId !== value) {
+      this._selectedId = value;
+      this._updateSelectedState();
+    }
+  }
+
+  _render() {
+    if (!this.shadowRoot) return;
     
-    // Create and append style element
-    const style = document.createElement('style');
-    style.textContent = `
-      :host {
-        display: block;
-        --primary-color: #4a6cf7;
-        --primary-light: #e6f0ff;
-        --hover-color: #f5f8ff;
-        --selected-color: #e6f0ff;
-        --text-color: #2d3748;
-        --text-secondary: #4a5568;
-        --border-color: #e2e8f0;
-        --border-radius: 4px;
-        --transition: all 0.2s ease;
-      }
-      
-      .selection-menu {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-      
-      .selection-menu__header {
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border-color);
-        font-weight: 600;
-        color: var(--text-color);
-      }
-      
-      .selection-menu__container {
-        flex: 1;
-        padding: 8px 0;
-        overflow-y: auto;
-      }
-      
-      .selection-menu__item {
-        display: flex;
-        align-items: center;
-        box-sizing: border-box;
-        padding: 8px 0;
-        cursor: pointer;
-      }
-      
-      
-      .selection-menu__item--selected {
-        background-color: var(--selected-color);
-        color: var(--primary-color);
-        font-weight: 500;
-      }
-      
-      .selection-menu__item--level-1 {
-        padding-left: 32px;
-      }
-      
-      .selection-menu__item--level-2 {
-        padding-left: 48px;
-      }
-      
-      .selection-menu__item--level-3 {
-        padding-left: 64px;
-      }
-    `;
-    
-    // Create the main container
-    const container = document.createElement('div');
-    container.className = 'selection-menu';
-    container.innerHTML = `
-      <div class="selection-menu__wrapper">
-        <div class="selection-menu__container">
-          <collapsible-list id="menuList" class="selection-menu__list" aria-label="Menu" reverse-heading="${this._reverseHeading}">
-            ${this.renderItems(this._data)}
-          </collapsible-list>
-        </div>
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          --primary-color: #4a6cf7;
+          --hover-bg: #f5f8ff;
+          --selected-bg: #e6f0ff;
+          --border-color: #e2e8f0;
+          --text-color: #2d3748;
+          --text-secondary: #4a5568;
+        }
+        
+        .menu-container {
+          border: 1px solid var(--border-color);
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        
+        .menu-item {
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+          margin: 2px 0;
+          border-radius: 4px;
+        }
+        
+        .menu-item:hover {
+          background-color: var(--hover-bg, #f5f8ff);
+        }
+        
+        .menu-item--selected {
+          background-color: var(--selected-bg, #e6f0ff);
+          color: var(--primary-color, #4a6cf7);
+          font-weight: 500;
+        }
+        
+        .menu-item--selected:hover {
+          background-color: var(--selected-bg, #e6f0ff);
+        }
+        
+        /* Style for the collapsible item header */
+        .menu-item::part(header) {
+          padding: 8px 12px;
+          display: flex;
+          align-items: center;
+        }
+        
+        /* Style for the collapsible item content */
+        .menu-item::part(content) {
+          padding: 4px 0;
+        }
+        
+        /* Remove bullets from ul elements */
+        ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+        
+        /* Ensure list items have no default styling */
+        li {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        
+        /* Leaf item styles */
+        .menu-item__leaf {
+          display: flex;
+          align-items: center;
+          padding: 8px 12px;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+          border-radius: 4px;
+        }
+        
+        .menu-item__leaf:hover {
+          background-color: var(--hover-bg, #f5f8ff);
+        }
+        
+        .menu-item__leaf.menu-item--selected {
+          background-color: var(--selected-bg, #e6f0ff);
+          color: var(--primary-color, #4a6cf7);
+          font-weight: 500;
+        }
+        
+        /* Add padding to collapsible item icon */
+        .collapsible-item__icon {
+          padding: 0 0.5rem;
+          font-size: 0.75rem;
+        }
+      </style>
+      <div class="menu-container">
+        ${this._renderItems(this._items, 0)}
       </div>
     `;
     
-    // Append style and container to shadow root
-    this.shadowRoot.appendChild(style);
-    this.shadowRoot.appendChild(container);
-    
-    // Set up event listeners after the DOM is ready
-    this.setupEventListeners();
+    this._addEventListeners();
   }
   
-  renderItems(items, level = 0) {
-    return items.map(item => {
+  _renderItems(items, level = 0) {
+    if (!items || !items.length) return '';
+    
+    // Create a container for the list
+    const listContainer = document.createElement('ul');
+    listContainer.style.listStyle = 'none';
+    listContainer.style.padding = '0';
+    listContainer.style.margin = '0';
+    
+    items.forEach(item => {
       const hasChildren = item.children && item.children.length > 0;
       const isSelected = this._selectedId === item.id;
       
-      return `
-        <collapsible-item 
-          class="selection-menu__item selection-menu__item--level-${level}"
-          value="${item.id}" 
-          data-id="${item.id}" 
-          level="${level}" 
-          ${!hasChildren ? 'no-children hide-icon' : ''} 
-          reverse-heading="${this._reverseHeading}"
-          ${isSelected ? 'selected' : ''}
-        >
-          <span slot="header" class="selection-menu__item-header ${isSelected ? 'selection-menu__item-header--selected' : ''}">
-            ${item.name}
-          </span>
-          ${hasChildren ? `
-            <collapsible-list class="selection-menu__list">
-              ${this.renderItems(item.children, level + 1)}
-            </collapsible-list>
-          ` : ''}
-        </collapsible-item>
-      `;
-    }).join('');
-  }
-  
-  setupEventListeners() {
-    const menuList = this.shadowRoot.getElementById('menuList');
-    
-    if (!menuList) {
-      console.error('menuList element not found in shadow DOM');
-      return;
-    }
-    
-    // Store the bound function so we can remove it later
-    this._boundHandleClick = this.handleItemClick.bind(this);
-    
-    // Add click listener with capture phase to catch all clicks
-    menuList.addEventListener('click', this._boundHandleClick, true);
-  }
-  
-  handleItemClick(event) {
-    // Check if the click is on a collapsible-item or its children
-    const item = event.target.closest('collapsible-item');
-    
-    if (!item) {
-      return;
-    }
-    
-    const itemId = item.getAttribute('data-id');
-    
-    if (!itemId) {
-      return;
-    }
-    
-    // Find the item data to check if it's a leaf node
-    const itemData = this._findItemById(this._data, itemId);
-    
-    // Only proceed if this is a leaf node (no children)
-    if (itemData && itemData.children && itemData.children.length > 0) {
-      return;
-    }
-    
-    this.setSelectedItem(itemId);
-    
-    // Create and dispatch the custom event for leaf items only
-    const customEvent = new CustomEvent('item-selected', {
-      detail: { 
-        id: itemId,
-        item: itemData
-      },
-      bubbles: true,
-      composed: true
+      // Create list item
+      const li = document.createElement('li');
+      li.setAttribute('data-id', item.id); // Add data-id to all list items
+      
+      if (hasChildren) {
+        // For items with children, use collapsible-item with ▼ icon
+        li.setAttribute('is', 'collapsible-item');
+        li.setAttribute('data-id', item.id); // Add data-id for event handling
+        li.setAttribute('label', item.name);
+        li.setAttribute('icon', '▼'); // Always set ▼ for collapsible items
+        if (isSelected) li.classList.add('menu-item--selected');
+        // Remove the line that was expanding level 0 items by default
+        
+        // Create nested UL for children
+        const childList = document.createElement('ul');
+        childList.style.listStyle = 'none';
+        childList.style.padding = '0';
+        childList.style.margin = '0 0 0 16px';
+        
+        // Recursively add children
+        childList.innerHTML = this._renderItems(item.children, level + 1);
+        
+        // Create a container for the content slot
+        const contentSlot = document.createElement('div');
+        contentSlot.slot = 'content';
+        contentSlot.appendChild(childList);
+        
+        li.appendChild(contentSlot);
+      } else {
+        // For leaf nodes, just use a span
+        const span = document.createElement('span');
+        span.className = 'menu-item__leaf';
+        if (isSelected) span.classList.add('menu-item--selected');
+        
+      
+        
+        // Add label
+        const label = document.createElement('span');
+        label.className = 'menu-item__label';
+        label.textContent = item.name;
+        span.appendChild(label);
+        
+        // Add click handler for selection
+        span.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._selectedId = item.id;
+          this._updateSelectedState();
+          this.dispatchEvent(new CustomEvent('item-selected', {
+            detail: {
+              id: item.id,
+              item: item,
+              name: item.name
+            },
+            bubbles: true,
+            composed: true
+          }));
+        });
+        
+        li.appendChild(span);
+      }
+      
+      listContainer.appendChild(li);
     });
     
-    this.dispatchEvent(customEvent);
-    
-    // Dispatch to window as a fallback
-    window.dispatchEvent(new CustomEvent('global-item-selected', {
-      detail: { 
-        id: itemId,
-        item: itemData
-      }
-    }));
+    return level === 0 ? listContainer.outerHTML : listContainer.innerHTML;
   }
   
-  // Helper method to find an item by ID in nested data
+  _addEventListeners() {
+    this.shadowRoot.addEventListener('click', this._boundOnItemClick);
+  }
+  
+  _removeEventListeners() {
+    this.shadowRoot.removeEventListener('click', this._boundOnItemClick);
+  }
+  
+  _onItemClick(event) {
+    
+    // Check if we clicked on a leaf node (span with menu-item__leaf class)
+    const leafNode = event.target.closest('.menu-item__leaf');
+    if (leafNode) {
+      const listItem = leafNode.closest('li');
+      const itemId = listItem ? listItem.getAttribute('data-id') : null;
+      
+      if (!itemId) {
+        console.warn('No data-id found on the clicked item');
+        return;
+      }
+      
+      // Find the item in our data structure
+      const item = this._findItemById(this._items, itemId);
+      
+      if (!item) {
+        console.warn('Item not found in data structure');
+        return;
+      }
+      
+      // Update selected state
+      this._selectedId = itemId;
+      this._updateSelectedState();
+      
+      // Dispatch custom event with item details
+      const customEvent = new CustomEvent('item-selected', {
+        detail: {
+          id: itemId,
+          item: item,
+          name: item.name
+        },
+        bubbles: true,
+        composed: true
+      });
+      
+      const eventDispatched = this.dispatchEvent(customEvent);
+      
+      // Update the selected attribute
+      this.setAttribute('selected', itemId);
+      return;
+    }
+    
+    // Handle collapsible item clicks
+    const itemElement = event.target.closest('li[is="collapsible-item"]');
+    if (!itemElement) {
+      return;
+    }
+    
+    
+    // Prevent event from bubbling up to parent items
+    event.stopPropagation();
+    
+    // Get the item ID
+    const itemId = itemElement.getAttribute('data-id');
+    
+    if (!itemId) {
+      console.warn('No data-id found on collapsible item');
+      return;
+    }
+    
+    // Find the item in our data structure
+    const item = this._findItemById(this._items, itemId);
+    
+    if (!item) {
+      console.warn('Collapsible item not found in data structure');
+      return;
+    }
+    
+    // Only proceed if this has children
+    if (item.children && item.children.length > 0) {
+      // Toggle expansion for non-leaf items
+      const isExpanded = itemElement.hasAttribute('expanded');
+      
+      if (isExpanded) {
+        itemElement.removeAttribute('expanded');
+      } else {
+        itemElement.setAttribute('expanded', '');
+      }
+    }
+  }
+  
+  _updateSelectedState() {
+    if (!this.shadowRoot) return;
+    
+    
+    // Remove selected class from all items
+    const allCollapsibleItems = this.shadowRoot.querySelectorAll('li[is="collapsible-item"]');
+    const allLeafItems = this.shadowRoot.querySelectorAll('.menu-item__leaf');
+    
+    allCollapsibleItems.forEach(item => {
+      item.classList.remove('menu-item--selected');
+      item.removeAttribute('selected');
+    });
+    
+    allLeafItems.forEach(leaf => {
+      leaf.classList.remove('menu-item--selected');
+    });
+    
+    // Add selected class to the selected item
+    if (this._selectedId) {
+      
+      // Check collapsible items
+      const selectedCollapsibleItem = this.shadowRoot.querySelector(`li[is="collapsible-item"][data-id="${this._selectedId}"]`);
+      if (selectedCollapsibleItem) {
+        selectedCollapsibleItem.classList.add('menu-item--selected');
+        selectedCollapsibleItem.setAttribute('selected', '');
+      }
+      
+      // Check leaf items
+      const selectedLeafItem = this.shadowRoot.querySelector(`li[data-id="${this._selectedId}"] .menu-item__leaf`);
+      if (selectedLeafItem) {
+        selectedLeafItem.classList.add('menu-item--selected');
+      }
+      
+      // If we didn't find the item, it might be because it's in a closed collapsible item
+      if (!selectedCollapsibleItem && !selectedLeafItem) {
+        console.warn('Could not find selected item in the DOM. It might be in a closed collapsible section.');
+      }
+    }
+  }
+  
   _findItemById(items, id) {
     for (const item of items) {
       if (item.id === id) return item;
@@ -229,113 +388,6 @@ export class SelectionMenu extends HTMLElement {
       }
     }
     return null;
-  }
-  
-  // Public method to set the selected item by ID
-  setSelectedItem(id) {
-    if (id === this._selectedId) return false;
-    
-    // Remove selected class from previously selected item
-    if (this._selectedId) {
-      const prevSelected = this.shadowRoot.querySelector(`collapsible-item[data-id="${this._selectedId}"]`);
-      if (prevSelected) {
-        prevSelected.removeAttribute('selected');
-      }
-    }
-    
-    // Set new selected item
-    this._selectedId = id;
-    
-    // Add selected class to new item
-    const newSelected = this.shadowRoot.querySelector(`collapsible-item[data-id="${id}"]`);
-    if (newSelected) {
-      newSelected.setAttribute('selected', '');
-    }
-    
-    // Update the value attribute
-    if (id) {
-      this.setAttribute('value', id);
-    } else {
-      this.removeAttribute('value');
-    }
-    
-    return true;
-  }
-  
-  // Getter/setter for data property
-  get data() {
-    return this._data;
-  }
-  
-  set data(value) {
-    if (Array.isArray(value)) {
-      this._data = value;
-      this.render();
-    } else if (typeof value === 'string') {
-      try {
-        this._data = JSON.parse(value);
-        this.render();
-      } catch (e) {
-        console.error('Invalid data format for selection-menu', e);
-      }
-    }
-  }
-  
-  // Getter/setter for blockEventsOnParent property
-  get blockEventsOnParent() {
-    return this._blockEventsOnParent;
-  }
-  
-  set blockEventsOnParent(value) {
-    if (value !== undefined) {
-      this._blockEventsOnParent = value;
-      this.setAttribute('block-events-on-parent', value ? '' : null);
-    }
-    return this._blockEventsOnParent;
-  }
-
-  // Getter/setter for reverseHeading property
-  get reverseHeading() {
-    return this._reverseHeading;
-  }
-
-  set reverseHeading(value) {
-    const newValue = value !== false && value !== 'false' && value !== null;
-    if (this._reverseHeading !== newValue) {
-      this._reverseHeading = newValue;
-      this.setAttribute('reverse-heading', newValue ? '' : null);
-      this.render();
-    }
-    
-    // Create style element
-    const style = document.createElement('style');
-    style.textContent = `
-      :host {
-        display: block;
-        width: 100%;
-      }
-      
-      #menuList {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-      }
-    `;
-    
-    // Create menu list container
-    const menuList = document.createElement('div');
-    menuList.id = 'menuList';
-    
-    // Clear shadow root and append new elements
-    this.shadowRoot.innerHTML = '';
-    this.shadowRoot.appendChild(style);
-    this.shadowRoot.appendChild(menuList);
-    
-    // Update the menu list content
-    menuList.innerHTML = this.renderItems(this._data);
-    
-    // Re-setup event listeners after render
-    this.setupEventListeners();
   }
 }
 

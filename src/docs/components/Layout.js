@@ -114,14 +114,14 @@ export default class DocsLayout extends HTMLElement {
           <ul class="nav-links">
             <li><a href="#/" class="nav-link" data-route="home">Home</a></li>
             <li class="nav-item">
-              <a href="#/collapsible-item" class="nav-link" data-route="collapsible-item">
-                Collapsible Item
+              <a href="#/icon-label" class="nav-link" data-route="icon-label">
+                Icon Label
                 <span class="nav-category atom">Atom</span>
               </a>
             </li>
             <li class="nav-item">
-              <a href="#/collapsible-list" class="nav-link" data-route="collapsible-list">
-                Collapsible List
+              <a href="#/collapsible-item" class="nav-link" data-route="collapsible-item">
+                Collapsible Item
                 <span class="nav-category molecule">Molecule</span>
               </a>
             </li>
