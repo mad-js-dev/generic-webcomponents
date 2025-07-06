@@ -118,7 +118,24 @@ export class SelectionMenu extends HTMLElement {
         
         /* Style for the collapsible item content */
         .menu-item::part(content) {
-          padding: 4px 0;
+          padding: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease, opacity 0.2s ease;
+          max-height: 0;
+          opacity: 0;
+          margin: 0;
+        }
+        
+        .menu-item::part(content).menu-item__content--expanded {
+          max-height: 1000px; /* Adjust based on your needs */
+          opacity: 1;
+          padding: 4px 0 4px 1rem;
+        }
+        
+        .menu-item__child-list {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 0 1rem;
         }
         
         /* Remove bullets from ul elements */
@@ -139,7 +156,7 @@ export class SelectionMenu extends HTMLElement {
         .menu-item__leaf {
           display: flex;
           align-items: center;
-          padding: 8px 12px;
+          padding: 4px 12px;
           cursor: pointer;
           transition: background-color 0.2s ease;
           border-radius: 4px;
@@ -155,10 +172,16 @@ export class SelectionMenu extends HTMLElement {
           font-weight: 500;
         }
         
-        /* Add padding to collapsible item icon */
-        .collapsible-item__icon {
-          padding: 0 0.5rem;
-          font-size: 0.75rem;
+        /* Arrow icon for collapsible items */
+        .menu-item__arrow {
+          display: inline-block;
+          width: 12px;
+          text-align: center;
+          transition: transform 0.2s ease;
+        }
+        
+        .menu-item[expanded] .menu-item__arrow {
+          transform: rotate(90deg);
         }
       </style>
       <div class="menu-container">
@@ -196,44 +219,40 @@ export class SelectionMenu extends HTMLElement {
         const hasSelectedDescendant = this._hasSelectedDescendant(item);
         const isExpanded = hasSelectedDescendant || isSelected;
         
-        // Set initial attributes
+        // Set initial expanded state
         if (isExpanded) {
           li.setAttribute('expanded', '');
-          li.setAttribute('icon', '▼');
-        } else {
-          li.setAttribute('icon', '▶');
         }
         
-        // Add selected class if needed
+        // Set the arrow icon using the icon attribute
+        li.setAttribute('icon', isExpanded ? '▼' : '▶');
+        li.style.marginRight = '8px';
+        li.style.transition = 'transform 0.2s ease';
+        
         if (isSelected) {
           li.classList.add('menu-item--selected');
         }
         
+        // Create and append child list
+        const childList = document.createElement('ul');
+        childList.className = 'menu-item__child-list';
+        childList.innerHTML = this._renderItems(item.children, level + 1);
+        
         // Create content container with proper styling
         const contentSlot = document.createElement('div');
         contentSlot.slot = 'content';
-        contentSlot.style.overflow = 'hidden';
+        contentSlot.className = 'menu-item__content';
         
-        // Create and append child list
-        const childList = document.createElement('ul');
-        childList.style.listStyle = 'none';
-        childList.style.padding = '0';
-        childList.style.margin = '0 0 0 1rem';
-        childList.innerHTML = this._renderItems(item.children, level + 1);
-        
-        // Set initial content state based on expanded status
-        if (!isExpanded) {
-          contentSlot.style.maxHeight = '0';
-          contentSlot.style.opacity = '0';
-          contentSlot.style.visibility = 'hidden';
-          contentSlot.style.padding = '0';
-          contentSlot.style.margin = '0';
-        } else {
-          contentSlot.style.paddingLeft = '1rem';
-        }
-        
+        // Add the child list to the content slot
         contentSlot.appendChild(childList);
+        
+        // Add the content slot to the collapsible item
         li.appendChild(contentSlot);
+        
+        // Handle the toggle event to update the content visibility
+        li.addEventListener('toggle', (e) => {
+          contentSlot.style.display = e.detail.expanded ? 'block' : 'none';
+        });
       } else {
         // For leaf nodes, just use a span
         const span = document.createElement('span');
@@ -307,16 +326,16 @@ export class SelectionMenu extends HTMLElement {
     if (itemElement && itemElement.getAttribute('is') === 'collapsible-item') {
       event.stopPropagation();
       
-      // Toggle the expanded state - the CollapsibleItem component will handle the visual changes
+      // Toggle the expanded state
       const isExpanded = itemElement.hasAttribute('expanded');
-      const content = itemElement.querySelector('[slot="content"]');
+      const arrowIcon = itemElement.querySelector('.menu-item__arrow');
       
       if (isExpanded) {
         itemElement.removeAttribute('expanded');
-        itemElement.setAttribute('icon', '▶');
+        if (arrowIcon) arrowIcon.textContent = '▶';
       } else {
         itemElement.setAttribute('expanded', '');
-        itemElement.setAttribute('icon', '▼');
+        if (arrowIcon) arrowIcon.textContent = '▼';
       }
       
       // Dispatch a custom event for the toggle action

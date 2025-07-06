@@ -47,11 +47,6 @@ li[is="collapsible-item"] {
     width: var(--collapsible-item-indicator-size);
     height: var(--collapsible-item-indicator-size);
     margin-left: 0.5rem;
-    transition: transform 0.2s ease-in-out;
-}
-
-.collapsible-item--expanded .collapsible-item__indicator {
-    transform: rotate(90deg);
 }
 
 /* Content styles */
@@ -79,11 +74,6 @@ li[is="collapsible-item"] {
 /* No padding variant */
 .collapsible-item--no-padding .collapsible-item__content {
     padding-left: 0;
-}
-
-/* Expanded state */
-.collapsible-item--expanded > .collapsible-item__header .collapsible-item__icon {
-    transform: rotate(90deg);
 }
 
 /* Content spacing */

@@ -15,7 +15,7 @@ import './CollapsibleItem.css';
 
 export class CollapsibleItem extends HTMLLIElement {
     static get observedAttributes() {
-        return ['expanded', 'icon', 'label', 'removeshift'];
+        return ['expanded', 'icon', 'label', 'removeshift', 'hide-icon'];
     }
     
     constructor() {
@@ -126,9 +126,10 @@ export class CollapsibleItem extends HTMLLIElement {
         contentWrapper.style.alignItems = 'center';
         contentWrapper.style.flex = '1';
         
-        // Add icon if provided
+        // Add icon if provided and not hidden
+        const hideIcon = this.hasAttribute('hide-icon');
         const icon = this.getAttribute('icon');
-        if (icon) {
+        if (icon && !hideIcon) {
             const iconEl = document.createElement('span');
             iconEl.className = 'collapsible-item__icon';
             iconEl.textContent = icon;
@@ -293,17 +294,26 @@ export class CollapsibleItem extends HTMLLIElement {
     _updateContentVisibility() {
         if (!this._content || !this._header) return;
         
-        // Update content visibility
+        const hideIcon = this.hasAttribute('hide-icon');
+        
         if (this._isExpanded) {
             this._content.classList.add('collapsible-item__content--expanded');
             this._content.style.display = 'block';
             this._header.setAttribute('aria-expanded', 'true');
             this.classList.add('collapsible-item--expanded');
+            // Update icon to expanded state (down arrow) only if not hidden
+            if (!hideIcon) {
+                this.setAttribute('icon', '▼');
+            }
         } else {
             this._content.classList.remove('collapsible-item__content--expanded');
             this._content.style.display = 'none';
             this._header.setAttribute('aria-expanded', 'false');
             this.classList.remove('collapsible-item--expanded');
+            // Update icon to collapsed state (right arrow) only if not hidden
+            if (!hideIcon) {
+                this.setAttribute('icon', '▶');
+            }
         }
     }
     
@@ -314,6 +324,28 @@ export class CollapsibleItem extends HTMLLIElement {
                 this.classList.add('collapsible-item--no-padding');
             } else {
                 this.classList.remove('collapsible-item--no-padding');
+            }
+        } else if (name === 'hide-icon' && this._header) {
+            // Handle hide-icon attribute changes
+            const iconEl = this._header.querySelector('.collapsible-item__icon');
+            if (newValue !== null) {
+                // hide-icon is set, remove the icon if it exists
+                if (iconEl) {
+                    iconEl.remove();
+                }
+            } else if (this.hasAttribute('icon')) {
+                // hide-icon is removed, add the icon back if we have an icon attribute
+                if (!iconEl) {
+                    const icon = this.getAttribute('icon');
+                    const newIconEl = document.createElement('span');
+                    newIconEl.className = 'collapsible-item__icon';
+                    newIconEl.textContent = icon;
+                    newIconEl.style.marginRight = '0.5rem';
+                    const contentWrapper = this._header.firstElementChild;
+                    if (contentWrapper) {
+                        contentWrapper.insertBefore(newIconEl, contentWrapper.firstChild);
+                    }
+                }
             }
         } else if (name === 'expanded') {
             const wasExpanded = this._isExpanded;

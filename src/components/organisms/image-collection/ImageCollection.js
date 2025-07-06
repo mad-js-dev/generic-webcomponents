@@ -229,16 +229,19 @@ export class ImageCollection extends HTMLElement {
                             label="${image.title}" 
                             ${image.removeshift ? 'removeshift="true"' : ''}
                             ${this._currentOpenIndex === index ? 'expanded' : ''}
+                            hide-icon
                             >
-                            <img 
-                                class="image-collection__image" 
-                                src="${image.src}" 
-                                alt="${image.title}"
-                                loading="lazy"
-                            >
+                            <div slot="content">
+                                <img 
+                                    class="image-collection__image" 
+                                    src="${image.src}" 
+                                    alt="${image.title}"
+                                    loading="lazy"
+                                >
+                            </div>
                         </li>
                     `).join('')}
-                </div>
+                </ul>
             </div>
         `;
     }
