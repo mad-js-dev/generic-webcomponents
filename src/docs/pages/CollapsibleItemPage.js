@@ -129,7 +129,7 @@ export default class CollapsibleItemPage extends HTMLElement {
       
       <div class="page-container">
         <h1>Collapsible List Item</h1>
-        <p>A lightweight, accessible collapsible list item component that extends the native <code>&lt;li&gt;</code> element.</p>
+        <p>A lightweight, accessible collapsible list item component that extends the native <code>&lt;li&gt;</code> element. It integrates with the <code>IconLabel</code> component for consistent icon and label display.</p>
         
         <div class="example">
           <h2>Basic Usage</h2>
@@ -165,36 +165,10 @@ export default class CollapsibleItemPage extends HTMLElement {
             
             <div class="code">
               <h3>Code</h3>
-              <pre><code>&lt;ul style="list-style: none; padding: 0;"&gt;
-  &lt;li is="collapsible-item" 
-       label="Documents" 
-       icon="📁"&gt;
-    &lt;div &gt;
-      &lt;p&gt;Content goes here&lt;/p&gt;
-    &lt;/div&gt;
-  &lt;/li&gt;
-  
-  &lt;li is="collapsible-item" 
-       label="Pictures" 
-       icon="🖼️" 
-       expanded&gt;
-    &lt;div &gt;
-      &lt;p&gt;Expanded by default&lt;/p&gt;
-      &lt;ul style="list-style: none; padding-left: 1.5rem;"&gt;
-        &lt;li&gt;Vacation.jpg&lt;/li&gt;
-        &lt;li&gt;Profile.png&lt;/li&gt;
-      &lt;/ul&gt;
-    &lt;/div&gt;
-  &lt;/li&gt;
-  
-  &lt;li is="collapsible-item" 
-       label="No Icon"
-       removeshift&gt;
-    &lt;div &gt;
-      &lt;p&gt;No left padding variant&lt;/p&gt;
-    &lt;/div&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;</code></pre>
+              <pre><code>${'<ul style="list-style: none; padding: 0;">\n'}
+${'  <li is="collapsible-item" \n       label="Documents" \n       icon="📁">\n    <div>\n      <p>Content goes here</p>\n    </div>\n  </li>\n'}
+${'  <li is="collapsible-item" \n       label="Pictures" \n       icon="🖼️" \n       expanded>\n    <div>\n      <p>Expanded by default</p>\n      <ul style="list-style: none; padding-left: 1.5rem;">\n        <li>Vacation.jpg</li>\n        <li>Profile.png</li>\n      </ul>\n    </div>\n  </li>\n'}
+${'  <li is="collapsible-item" \n       label="No Icon"\n       removeshift>\n    <div>\n      <p>No left padding variant</p>\n    </div>\n  </li>\n</ul>'}</code></pre>
             </div>
           </div>
           
@@ -213,25 +187,25 @@ export default class CollapsibleItemPage extends HTMLElement {
                 <td><code>label</code></td>
                 <td>String</td>
                 <td>''</td>
-                <td>Text to display in the header</td>
+                <td>Text to display in the header. This is passed to the <code>IconLabel</code> component.</td>
               </tr>
               <tr>
                 <td><code>icon</code></td>
                 <td>String</td>
                 <td>''</td>
-                <td>Optional icon to display before the label</td>
+                <td>Optional icon to display before the label. This is passed to the <code>IconLabel</code> component.</td>
               </tr>
               <tr>
                 <td><code>expanded</code></td>
                 <td>Boolean</td>
                 <td><code>false</code></td>
-                <td>Whether the item is expanded by default</td>
+                <td>Whether the item is expanded by default. When true, the content is visible and the expand indicator points down (▼).</td>
               </tr>
               <tr>
                 <td><code>removeshift</code></td>
                 <td>Boolean</td>
                 <td><code>false</code></td>
-                <td>If true, removes the left padding from the content area</td>
+                <td>If true, removes the left padding from the content area for a more compact look.</td>
               </tr>
             </tbody>
           </table>
@@ -300,17 +274,17 @@ export default class CollapsibleItemPage extends HTMLElement {
           <tbody>
             <tr>
               <td><code>toggle()</code></td>
-              <td>Toggles the expanded state</td>
+              <td>Toggles the expanded state. Dispatches a 'toggle' event with the new state.</td>
               <td>void</td>
             </tr>
             <tr>
               <td><code>expand()</code></td>
-              <td>Expands the item</td>
+              <td>Expands the item if not already expanded. Dispatches a 'toggle' event if state changes.</td>
               <td>void</td>
             </tr>
             <tr>
               <td><code>collapse()</code></td>
-              <td>Collapses the item</td>
+              <td>Collapses the item if not already collapsed. Dispatches a 'toggle' event if state changes.</td>
               <td>void</td>
             </tr>
           </tbody>
@@ -335,18 +309,37 @@ export default class CollapsibleItemPage extends HTMLElement {
         </table>
 
         <h2>Styling</h2>
-        <p>Customize the appearance using BEM (Block Element Modifier) classes:</p>
+        <p>Customize the appearance using these CSS custom properties and BEM classes:</p>
         
-        <pre><code>/* Block: Main component */
+        <h3>CSS Custom Properties</h3>
+        <pre><code>collapsible-item {
+  --collapsible-item-padding: 0.5rem 1rem;  /* Padding for the header */
+  --collapsible-item-indicator-size: 1em;   /* Size of the expand/collapse indicator */
+}
+</code></pre>
+
+        <h3>BEM Classes</h3>
+        <pre><code>/* Block */
+.collapsible-item {}
+
+/* Elements */
+.collapsible-item__header {}
+.collapsible-item__indicator {}
+.collapsible-item__content {}
+
+/* Modifiers */
+.collapsible-item--expanded {}
+.collapsible-item--no-padding {}
 </code></pre>
 
         <h2>Accessibility</h2>
         <p>The component includes built-in accessibility features:</p>
         <ul>
-          <li>ARIA attributes for screen readers</li>
-          <li>Keyboard navigation (Tab, Enter, Space)</li>
-          <li>Focus management</li>
-          <li>Proper heading structure</li>
+          <li><strong>ARIA attributes</strong>: Uses <code>role="button"</code> and <code>aria-expanded</code> on the header for screen readers</li>
+          <li><strong>Keyboard navigation</strong>: Supports Tab, Enter, and Space keys for toggling</li>
+          <li><strong>Focus management</strong>: Maintains proper focus states and tab order</li>
+          <li><strong>Semantic HTML</strong>: Uses proper list structure with <code>&lt;li&gt;</code> elements</li>
+          <li><strong>High contrast</strong>: Ensures proper color contrast for text and interactive elements</li>
         </ul>
 
         <div class="highlight">

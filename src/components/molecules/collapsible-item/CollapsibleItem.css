@@ -1,67 +1,106 @@
 /* Base styles for the component */
 li[is="collapsible-item"] {
-  --collapsible-item-padding: 0.5rem 0.5rem 0 1.5rem;
-  display: block;
-  margin: 0 0 0.5rem 0;
-  list-style: none;
-  width: 100%;
-  padding: 0;
-  overflow: hidden;
-}
-li[is="collapsible-item"] li[is="collapsible-item"] {
-    margin-left: 0;
+    --collapsible-item-padding: 0.5rem 1rem;
+    --collapsible-item-indicator-size: 1em;
+    position: relative;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* Elements */
+/* Header styles */
 .collapsible-item__header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  cursor: pointer;
-  margin: 0;
-  background-color: transparent;
-  transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--collapsible-item-padding);
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    width: 100%;
+    border: none;
+    text-align: left;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
 }
 
 .collapsible-item__header:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
-.collapsible-item__icon {
-  display: inline-flex;
-  align-items: center;
+/* Icon label styles */
+.collapsible-item__header icon-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.collapsible-item__label {
-  display: inline-block;
+/* Expand/collapse indicator */
+.collapsible-item__indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--collapsible-item-indicator-size);
+    height: var(--collapsible-item-indicator-size);
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease-in-out;
 }
 
+.collapsible-item--expanded .collapsible-item__indicator {
+    transform: rotate(90deg);
+}
+
+/* Content styles */
 .collapsible-item__content {
-  padding: var(--collapsible-item-padding);
-  max-height: 0;
-  overflow: hidden;
-  box-sizing: border-box;
-  transition: max-height 0.3s ease-out;
-  will-change: max-height;
+    display: none;
+    padding: 0.25rem 0 0.25rem 1.5rem;
+    margin: 0;
+    height: auto;
+    max-height: none;
+    overflow: visible;
 }
 
-/* Modifiers */
-li[is="collapsible-item"].collapsible-item--expanded .collapsible-item__content {
-  max-height: 5000px; /* Adjust based on your content */
-  transition: max-height 0.5s ease-in;
+.collapsible-item__content--expanded {
+    display: block;
+    height: auto;
+    max-height: none;
+    overflow: visible;
 }
 
-li[is="collapsible-item"].collapsible-item--nested {
-  padding-left: 1.5rem;
-  margin-top: 0.5rem;
-  border: none;
-  border-radius: 0;
-  border-top: 1px solid #e2e8f0;
+/* Nested items */
+.collapsible-item--nested {
+    margin-left: 1rem;
 }
 
-li[is="collapsible-item"].collapsible-item--no-padding .collapsible-item__content,
-li[is="collapsible-item"] .collapsible-item--nested {
-  padding-left: 0;
-  padding-right: 0;
+/* No padding variant */
+.collapsible-item--no-padding .collapsible-item__content {
+    padding-left: 0;
+}
+
+/* Expanded state */
+.collapsible-item--expanded > .collapsible-item__header .collapsible-item__icon {
+    transform: rotate(90deg);
+}
+
+/* Content spacing */
+.collapsible-item__content > * {
+    margin: 0.5rem 0;
+}
+
+.collapsible-item__content > *:first-child {
+    margin-top: 0;
+}
+
+.collapsible-item__content > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Selection styles */
+.menu-item--selected > .collapsible-item__header {
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.05);
 }

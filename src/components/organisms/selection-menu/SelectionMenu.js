@@ -184,31 +184,55 @@ export class SelectionMenu extends HTMLElement {
       
       // Create list item
       const li = document.createElement('li');
-      li.setAttribute('data-id', item.id); // Add data-id to all list items
+      li.setAttribute('data-id', item.id);
       
       if (hasChildren) {
-        // For items with children, use collapsible-item with ▼ icon
+        // For items with children, use collapsible-item
         li.setAttribute('is', 'collapsible-item');
-        li.setAttribute('data-id', item.id); // Add data-id for event handling
+        li.setAttribute('data-id', item.id);
         li.setAttribute('label', item.name);
-        li.setAttribute('icon', '▼'); // Always set ▼ for collapsible items
-        if (isSelected) li.classList.add('menu-item--selected');
-        // Remove the line that was expanding level 0 items by default
         
-        // Create nested UL for children
+        // Determine initial state
+        const hasSelectedDescendant = this._hasSelectedDescendant(item);
+        const isExpanded = hasSelectedDescendant || isSelected;
+        
+        // Set initial attributes
+        if (isExpanded) {
+          li.setAttribute('expanded', '');
+          li.setAttribute('icon', '▼');
+        } else {
+          li.setAttribute('icon', '▶');
+        }
+        
+        // Add selected class if needed
+        if (isSelected) {
+          li.classList.add('menu-item--selected');
+        }
+        
+        // Create content container with proper styling
+        const contentSlot = document.createElement('div');
+        contentSlot.slot = 'content';
+        contentSlot.style.overflow = 'hidden';
+        
+        // Create and append child list
         const childList = document.createElement('ul');
         childList.style.listStyle = 'none';
         childList.style.padding = '0';
-        childList.style.margin = '0 0 0 16px';
-        
-        // Recursively add children
+        childList.style.margin = '0 0 0 1rem';
         childList.innerHTML = this._renderItems(item.children, level + 1);
         
-        // Create a container for the content slot
-        const contentSlot = document.createElement('div');
-        contentSlot.slot = 'content';
-        contentSlot.appendChild(childList);
+        // Set initial content state based on expanded status
+        if (!isExpanded) {
+          contentSlot.style.maxHeight = '0';
+          contentSlot.style.opacity = '0';
+          contentSlot.style.visibility = 'hidden';
+          contentSlot.style.padding = '0';
+          contentSlot.style.margin = '0';
+        } else {
+          contentSlot.style.paddingLeft = '1rem';
+        }
         
+        contentSlot.appendChild(childList);
         li.appendChild(contentSlot);
       } else {
         // For leaf nodes, just use a span
@@ -258,90 +282,54 @@ export class SelectionMenu extends HTMLElement {
   }
   
   _onItemClick(event) {
-    
-    // Check if we clicked on a leaf node (span with menu-item__leaf class)
+    // Handle leaf node clicks
     const leafNode = event.target.closest('.menu-item__leaf');
     if (leafNode) {
-      const listItem = leafNode.closest('li');
-      const itemId = listItem ? listItem.getAttribute('data-id') : null;
-      
-      if (!itemId) {
-        console.warn('No data-id found on the clicked item');
-        return;
+      event.stopPropagation();
+      const itemId = leafNode.getAttribute('data-id');
+      if (itemId) {
+        this.selected = itemId;
+        this._updateSelectedState();
+        this.dispatchEvent(new CustomEvent('item-selected', {
+          detail: { id: itemId },
+          bubbles: true,
+          composed: true
+        }));
       }
-      
-      // Find the item in our data structure
-      const item = this._findItemById(this._items, itemId);
-      
-      if (!item) {
-        console.warn('Item not found in data structure');
-        return;
-      }
-      
-      // Update selected state
-      this._selectedId = itemId;
-      this._updateSelectedState();
-      
-      // Dispatch custom event with item details
-      const customEvent = new CustomEvent('item-selected', {
-        detail: {
-          id: itemId,
-          item: item,
-          name: item.name
-        },
-        bubbles: true,
-        composed: true
-      });
-      
-      const eventDispatched = this.dispatchEvent(customEvent);
-      
-      // Update the selected attribute
-      this.setAttribute('selected', itemId);
       return;
     }
     
     // Handle collapsible item clicks
-    const itemElement = event.target.closest('li[is="collapsible-item"]');
-    if (!itemElement) {
-      return;
-    }
+    const header = event.target.closest('.collapsible-item__header');
+    if (!header) return;
     
-    
-    // Prevent event from bubbling up to parent items
-    event.stopPropagation();
-    
-    // Get the item ID
-    const itemId = itemElement.getAttribute('data-id');
-    
-    if (!itemId) {
-      console.warn('No data-id found on collapsible item');
-      return;
-    }
-    
-    // Find the item in our data structure
-    const item = this._findItemById(this._items, itemId);
-    
-    if (!item) {
-      console.warn('Collapsible item not found in data structure');
-      return;
-    }
-    
-    // Only proceed if this has children
-    if (item.children && item.children.length > 0) {
-      // Toggle expansion for non-leaf items
+    const itemElement = header.parentElement;
+    if (itemElement && itemElement.getAttribute('is') === 'collapsible-item') {
+      event.stopPropagation();
+      
+      // Toggle the expanded state - the CollapsibleItem component will handle the visual changes
       const isExpanded = itemElement.hasAttribute('expanded');
+      const content = itemElement.querySelector('[slot="content"]');
       
       if (isExpanded) {
         itemElement.removeAttribute('expanded');
+        itemElement.setAttribute('icon', '▶');
       } else {
         itemElement.setAttribute('expanded', '');
+        itemElement.setAttribute('icon', '▼');
       }
+      
+      // Dispatch a custom event for the toggle action
+      itemElement.dispatchEvent(new CustomEvent('toggle', {
+        detail: { expanded: !isExpanded },
+        bubbles: true,
+        composed: true
+      }));
     }
   }
   
   _updateSelectedState() {
     if (!this.shadowRoot) return;
-    
     
     // Remove selected class from all items
     const allCollapsibleItems = this.shadowRoot.querySelectorAll('li[is="collapsible-item"]');
@@ -379,7 +367,23 @@ export class SelectionMenu extends HTMLElement {
     }
   }
   
+  _hasSelectedDescendant(item) {
+    if (!item) return false;
+    
+    // Check if this item is selected
+    if (item.id === this._selectedId) return true;
+    
+    // Check if any child is selected
+    if (item.children) {
+      return item.children.some(child => this._hasSelectedDescendant(child));
+    }
+    
+    return false;
+  }
+  
   _findItemById(items, id) {
+    if (!items || !items.length) return null;
+    
     for (const item of items) {
       if (item.id === id) return item;
       if (item.children) {
