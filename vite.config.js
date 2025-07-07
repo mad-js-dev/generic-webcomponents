@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import dts from 'vite-plugin-dts';
+import baseUrlPlugin from './vite.baseurl.js';
 
 // For ESM, __dirname isn't available, so we create it
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -26,9 +27,22 @@ export default defineConfig(({ command, mode }) => {
   if (isDocs) {
     return {
       ...baseConfig,
+      base: './',  // Use relative paths for GitHub Pages
+      plugins: [
+        {
+          name: 'rewrite-asset-paths',
+          transformIndexHtml(html) {
+            // Convert absolute paths to relative paths
+            return html
+              .replace(/\/generic-webcomponents\//g, '')
+              .replace(/<base href=".*?">/, '');
+          }
+        }
+      ],
       build: {
         outDir: 'docs',
         emptyOutDir: true,
+        assetsDir: 'assets',
         rollupOptions: {
           input: {
             main: resolve(__dirname, 'index.html'),
@@ -44,9 +58,12 @@ export default defineConfig(({ command, mode }) => {
             assetFileNames: 'assets/[name]-[hash][extname]',
           },
         },
+        // Ensure assets are copied to the correct directory
+        assetsInlineLimit: 0,
       },
       server: {
-        port: 3000
+        port: 3000,
+        strictPort: true
       },
     };
   }
