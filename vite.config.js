@@ -13,6 +13,7 @@ export default defineConfig(({ command, mode }) => {
   // Base config for library
   const baseConfig = {
     root: './',
+    base: isDocs ? '/generic-webcomponents/' : '/',
     publicDir: 'public',
     resolve: {
       alias: {
@@ -21,10 +22,28 @@ export default defineConfig(({ command, mode }) => {
     },
   };
 
-  // Skip docs build for now
+  // Docs build configuration
   if (isDocs) {
-    console.log('Documentation build is currently disabled');
-    return { ...baseConfig, build: { emptyOutDir: false } };
+    return {
+      ...baseConfig,
+      build: {
+        outDir: 'docs',
+        emptyOutDir: true,
+        rollupOptions: {
+          input: {
+            main: resolve(__dirname, 'index.html'),
+            IconLabelPage: resolve(__dirname, 'src/docs/pages/IconLabelPage.html'),
+            ProductLayoutPage: resolve(__dirname, 'src/docs/pages/ProductLayoutPage.html'),
+            // Add other pages here
+          },
+          output: {
+            entryFileNames: 'assets/[name]-[hash].js',
+            chunkFileNames: 'assets/[name]-[hash].js',
+            assetFileNames: 'assets/[name]-[hash][extname]',
+          },
+        },
+      },
+    };
   }
 
   // Library build config

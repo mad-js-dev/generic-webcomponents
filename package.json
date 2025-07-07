@@ -42,16 +42,17 @@
     "start": "vite preview --config vite.config.js",
     "build": "vite build --mode production && npm run build:types",
     "build:lib": "vite build --mode production",
-    "build:docs": "echo 'Documentation build is currently disabled'",
+    "build:docs": "vite build --mode docs",
+    "preview:docs": "vite preview --port 4173 --outDir docs",
     "build:types": "tsc --emitDeclarationOnly --declaration --allowJs --esModuleInterop --outDir dist",
+    "predeploy": "npm run build:docs",
+    "deploy": "node gh-pages.js",
     "preview": "vite preview --config vite.config.js",
     "prepare": "npm run build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublishOnly": "npm run build",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "prepublishOnly": "npm run build"
   },
   "jest": {
     "testEnvironment": "jsdom",
