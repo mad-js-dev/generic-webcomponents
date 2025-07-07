@@ -1,5 +1,5 @@
 export default class CollapsibleItemPage extends HTMLElement {
     connectedCallback(): void;
-    setupExamples(): void;
+    setupEventListeners(): void;
     render(): void;
 }

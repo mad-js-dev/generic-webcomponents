@@ -1,26 +1,29 @@
 /**
  * SelectionMenu Component
- * A custom element that creates a selectable menu using collapsible-list components
+ * A collapsible menu that allows selection of leaf nodes using CollapsibleItem
+ *
+ * @fires item-selected - Dispatched when a leaf node is selected
+ * @property {string} items - JSON string representing the menu items structure
+ * @property {string} selected - ID of the currently selected item
  */
 export class SelectionMenu extends HTMLElement {
     static get observedAttributes(): string[];
+    _items: any[];
     _selectedId: any;
-    _data: any[];
-    _blockEventsOnParent: boolean;
-    _reverseHeading: boolean;
+    _boundOnItemClick: (event: any) => void;
     connectedCallback(): void;
+    disconnectedCallback(): void;
     attributeChangedCallback(name: any, oldValue: any, newValue: any): void;
-    set data(value: any[]);
-    get data(): any[];
-    set blockEventsOnParent(value: boolean);
-    get blockEventsOnParent(): boolean;
-    set reverseHeading(value: boolean);
-    get reverseHeading(): boolean;
-    render(): void;
-    renderItems(items: any, level?: number): any;
-    setupEventListeners(): void;
-    _boundHandleClick: ((event: any) => void) | undefined;
-    handleItemClick(event: any): void;
+    set items(value: string);
+    get items(): string;
+    set selected(value: any);
+    get selected(): any;
+    _render(): void;
+    _renderItems(items: any, level?: number): string;
+    _addEventListeners(): void;
+    _removeEventListeners(): void;
+    _onItemClick(event: any): void;
+    _updateSelectedState(): void;
+    _hasSelectedDescendant(item: any): any;
     _findItemById(items: any, id: any): any;
-    setSelectedItem(id: any): boolean;
 }
