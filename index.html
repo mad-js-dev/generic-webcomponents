@@ -6,6 +6,19 @@
     <title>Web Components Documentation</title>
     <base href="/generic-webcomponents/">
     <script type="module" src="/src/main.js"></script>
+    <script type="module">
+      // Handle client-side routing for GitHub Pages
+      (function() {
+        const currentPath = window.location.pathname;
+        const basePath = '/generic-webcomponents/';
+        
+        // If we're not already at the base URL, redirect to it
+        if (!currentPath.startsWith(basePath) && currentPath !== '/') {
+          const newPath = basePath + currentPath.replace(/^\/+/, '');
+          window.history.replaceState(null, '', newPath);
+        }
+      })();
+    </script>
     <style>
         /* Global styles */
         *, *::before, *::after {
@@ -52,15 +65,13 @@
                 padding: 1rem !important;
             }
         }
-
-
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- Content will be loaded by the documentation component -->
+        <!-- App will be mounted here -->
+        <h1>Loading...</h1>
     </div>
-    
     <script type="module" src="./src/main.js"></script>
 </body>
 </html>

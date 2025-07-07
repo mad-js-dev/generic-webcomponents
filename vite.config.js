@@ -32,9 +32,11 @@ export default defineConfig(({ command, mode }) => {
         rollupOptions: {
           input: {
             main: resolve(__dirname, 'index.html'),
-            IconLabelPage: resolve(__dirname, 'src/docs/pages/IconLabelPage.html'),
-            ProductLayoutPage: resolve(__dirname, 'src/docs/pages/ProductLayoutPage.html'),
-            // Add other pages here
+            IconLabelPage: resolve(__dirname, 'src/docs/pages/IconLabelPage.js'),
+            ProductLayoutPage: resolve(__dirname, 'src/docs/pages/ProductLayoutPage.js'),
+            ImageCollectionPage: resolve(__dirname, 'src/docs/pages/ImageCollectionPage.js'),
+            CollapsibleItemPage: resolve(__dirname, 'src/docs/pages/CollapsibleItemPage.js'),
+            SelectionMenuPage: resolve(__dirname, 'src/docs/pages/SelectionMenuPage.js')
           },
           output: {
             entryFileNames: 'assets/[name]-[hash].js',
@@ -42,6 +44,9 @@ export default defineConfig(({ command, mode }) => {
             assetFileNames: 'assets/[name]-[hash][extname]',
           },
         },
+      },
+      server: {
+        port: 3000
       },
     };
   }
