@@ -8,19 +8,19 @@ import { ImageCollection } from '../../organisms/image-collection/ImageCollectio
 const defaultImages = [
   {
     title: 'Nature',
-    src: '/images/samples/nature.jpg',
+    src: 'images/samples/nature.jpg',
     alt: 'Scenic nature landscape',
     description: 'A beautiful landscape showcasing nature\'s beauty.'
   },
   {
     title: 'Architecture',
-    src: '/images/samples/architecture.jpg',
+    src: 'images/samples/architecture.jpg',
     alt: 'Modern architecture building',
     description: 'Stunning modern architecture design.'
   },
   {
     title: 'Technology',
-    src: '/images/samples/technology.jpg',
+    src: 'images/samples/technology.jpg',
     alt: 'Technology circuit board',
     description: 'Close-up of an advanced circuit board.'
   }
