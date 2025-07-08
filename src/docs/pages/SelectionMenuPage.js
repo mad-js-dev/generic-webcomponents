@@ -208,7 +208,7 @@ export default class SelectionMenuPage extends HTMLElement {
     pageContainer.appendChild(this.createElement('h2', { textContent: 'Installation' }));
     const preInstall = this.createElement('pre');
     preInstall.appendChild(this.createElement('code', { 
-      textContent: '<script type="module" src="/path/to/SelectionMenu.js"></script>' 
+      textContent: '<script type="module" src="../../components/organisms/selection-menu/SelectionMenu.js"></script>' 
     }));
     pageContainer.appendChild(preInstall);
 

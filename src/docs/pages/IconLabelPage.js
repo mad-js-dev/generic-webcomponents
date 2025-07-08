@@ -157,18 +157,18 @@ export default class IconLabelPage extends HTMLElement {
         <p>Basic usage with an icon image:</p>
         
         <div class="demo">
-          <icon-label icon="/icons/Shard_Icon_CP2077.webp" label="Cyberware Shard"></icon-label>
+          <icon-label icon="icons/Shard_Icon_CP2077.webp" label="Cyberware Shard"></icon-label>
         </div>
 
         <h4>Code:</h4>
         <pre><code>&lt;icon-label 
-  icon="/icons/Shard_Icon_CP2077.webp"
+  icon="icons/Shard_Icon_CP2077.webp"
   label="Cyberware Shard"
 &gt;&lt;/icon-label&gt;</code></pre>
         
         <p>Or using slots for more control:</p>
         <pre><code>&lt;icon-label&gt;
-  &lt;img slot="icon" src="/icons/Shard_Icon_CP2077.webp" alt="Shard Icon"&gt;
+  &lt;img slot="icon" src="icons/Shard_Icon_CP2077.webp" alt="Shard Icon"&gt;
   Cyberware Shard
 &lt;/icon-label&gt;</code></pre>
         
@@ -237,10 +237,10 @@ export default class IconLabelPage extends HTMLElement {
         <div class="demo">
           <div class="example-grid">
             <div>
-              <icon-label icon="/icons/Shard_Icon_CP2077.webp" label="Shard Icon"></icon-label>
+              <icon-label icon="icons/Shard_Icon_CP2077.webp" label="Shard Icon"></icon-label>
             </div>
             <div>
-              <icon-label icon="/icons/Shard_Icon_CP2077.webp" label="Shard (WebP)"></icon-label>
+              <icon-label icon="icons/Shard_Icon_CP2077.webp" label="Shard (WebP)"></icon-label>
             </div>
             <div>
               <icon-label icon="https://example.com/Shard_Icon_CP2077.webp" label="Remote Shard"></icon-label>
@@ -251,13 +251,13 @@ export default class IconLabelPage extends HTMLElement {
         <h4>Code:</h4>
         <pre><code>&lt;!-- Local WebP --&gt;
 &lt;icon-label 
-  icon="/icons/Shard_Icon_CP2077.webp"
+  icon="icons/Shard_Icon_CP2077.webp"
   label="Shard Icon"
 &gt;&lt;/icon-label&gt;
 
 &lt;!-- Different Sizes --&gt;
 &lt;icon-label 
-  icon="/icons/Shard_Icon_CP2077.webp"
+  icon="icons/Shard_Icon_CP2077.webp"
   label="Shard (WebP)"
   style="font-size: 1.5rem;"
 &gt;&lt;/icon-label&gt;
@@ -275,7 +275,7 @@ export default class IconLabelPage extends HTMLElement {
         
         <div class="demo">
           <icon-label 
-            icon="/assets/icons/arrow-right.png" 
+            icon="icons/arrow-right.png" 
             label="Next Page"
             reverse
           ></icon-label>
