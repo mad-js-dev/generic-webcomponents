@@ -1,4 +1,4 @@
-import "./index-8gPyMbfT.js";
+import "./index-2arlkGxx.js";
 class ImageCollection extends HTMLElement {
   static get observedAttributes() {
     return ["images"];
@@ -203,19 +203,19 @@ if (!customElements.get("image-collection")) {
 const defaultImages = [
   {
     title: "Nature",
-    src: "/images/samples/nature.jpg",
+    src: "images/samples/nature.jpg",
     alt: "Scenic nature landscape",
     description: "A beautiful landscape showcasing nature's beauty."
   },
   {
     title: "Architecture",
-    src: "/images/samples/architecture.jpg",
+    src: "images/samples/architecture.jpg",
     alt: "Modern architecture building",
     description: "Stunning modern architecture design."
   },
   {
     title: "Technology",
-    src: "/images/samples/technology.jpg",
+    src: "images/samples/technology.jpg",
     alt: "Technology circuit board",
     description: "Close-up of an advanced circuit board."
   }
@@ -394,4 +394,4 @@ if (typeof window !== "undefined" && !customElements.get("product-layout")) {
 export {
   ProductLayout
 };
-//# sourceMappingURL=ProductLayout-B5jeFtH1.js.map
+//# sourceMappingURL=ProductLayout-7yS6X1oE.js.map

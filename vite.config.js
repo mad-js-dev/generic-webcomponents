@@ -70,33 +70,57 @@ export default defineConfig(({ command, mode }) => {
 
   // Library build config
   if (isBuild && !isDocs) {
+    const isReactBuild = process.env.BUILD_TARGET === 'react';
+    const entry = isReactBuild 
+      ? resolve(__dirname, 'src/wrappers/react/index.jsx')
+      : resolve(__dirname, 'src/index.js');
+    
+    const fileName = isReactBuild 
+      ? 'react'
+      : 'index';
+
     return {
       ...baseConfig,
       plugins: [
         dts({
           insertTypesEntry: true,
-          include: ['src/**/*'],
+          include: isReactBuild 
+            ? ['src/wrappers/react/**/*'] 
+            : ['src/**/*', '!src/wrappers/react/**/*'],
           exclude: ['**/__tests__/**', '**/*.test.js'],
+          outDir: isReactBuild ? 'dist/types/react' : 'dist/types',
         }),
       ],
       build: {
         outDir: 'dist',
         lib: {
-          entry: resolve(__dirname, 'src/index.js'),
-          name: 'GenericWebComponents',
-          fileName: (format) => `index.${format}.js`,
+          entry,
+          name: isReactBuild ? 'GenericWebComponentsReact' : 'GenericWebComponents',
+          fileName: (format) => {
+            const ext = format === 'es' ? 'mjs' : 'js';
+            return isReactBuild 
+              ? `react.${format}.${ext}`
+              : `index.${format}.${ext}`;
+          },
           formats: ['es', 'umd'],
         },
         rollupOptions: {
           // Make sure to externalize deps that shouldn't be bundled
-          external: ['react', 'react-dom', 'vue'],
+          external: isReactBuild 
+            ? ['react', 'react-dom'] 
+            : ['react', 'react-dom', 'vue'],
           output: {
             // Provide global variables to use in the UMD build
-            globals: {
-              react: 'React',
-              'react-dom': 'ReactDOM',
-              vue: 'Vue',
-            },
+            globals: isReactBuild
+              ? {
+                  react: 'React',
+                  'react-dom': 'ReactDOM',
+                }
+              : {
+                  react: 'React',
+                  'react-dom': 'ReactDOM',
+                  vue: 'Vue',
+                },
           },
         },
         sourcemap: true,

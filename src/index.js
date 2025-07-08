@@ -4,11 +4,15 @@ export * from './components';
 // Additional components that need to be loaded asynchronously
 import { loadAdditionalComponents, getAdditionalComponents } from './components';
 
-// Export React wrappers
-export { default as ReactWrappers } from './wrappers/react/index.jsx';
+// Import React wrappers
+import ReactWrappers from './wrappers/react/index.jsx';
 
 // Export Vue plugin
 export { default as VuePlugin } from './wrappers/vue';
+
+// Export React wrappers as both default and named exports
+export const ReactComponents = ReactWrappers;
+export default ReactWrappers;
 
 // Export component loader
 export const Components = {
@@ -27,3 +31,6 @@ export const Components = {
 if (typeof window !== 'undefined') {
   Components.load().catch(console.error);
 }
+
+// For better tree-shaking and explicit imports
+export * from './components';

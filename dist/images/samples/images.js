@@ -2,17 +2,17 @@
 export default [
   {
     "title": "Nature",
-    "src": "/images/samples/nature.jpg",
+    "src": "images/samples/nature.jpg",
     "alt": "Scenic nature landscape"
   },
   {
     "title": "Architecture",
-    "src": "/images/samples/architecture.jpg",
+    "src": "images/samples/architecture.jpg",
     "alt": "Modern architecture building"
   },
   {
     "title": "Technology",
-    "src": "/images/samples/technology.jpg",
+    "src": "images/samples/technology.jpg",
     "alt": "Technology circuit board"
   }
 ];

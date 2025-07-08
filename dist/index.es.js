@@ -1,4 +1,4 @@
-import { b, a, C, w, V, g, l } from "./index-8gPyMbfT.js";
+import { b, a, C, w, V, g, l } from "./index-2arlkGxx.js";
 export {
   b as CollapsibleItem,
   a as CollapsibleList,

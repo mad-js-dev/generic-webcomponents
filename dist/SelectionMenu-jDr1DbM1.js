@@ -8,7 +8,7 @@ class SelectionMenu extends HTMLElement {
     this._items = [];
     this._selectedId = null;
     this._boundOnItemClick = this._onItemClick.bind(this);
-    import("./index-8gPyMbfT.js").then((n) => n.c);
+    import("./index-2arlkGxx.js").then((n) => n.c);
   }
   connectedCallback() {
     this._render();
@@ -328,4 +328,4 @@ if (!customElements.get("selection-menu")) {
 export {
   SelectionMenu
 };
-//# sourceMappingURL=SelectionMenu-Dv2K-eoF.js.map
+//# sourceMappingURL=SelectionMenu-jDr1DbM1.js.map

@@ -655,13 +655,13 @@ const CollapsibleItem$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.d
 let additionalComponents = {};
 async function loadAdditionalComponents() {
   try {
-    const selectionMenuModule = await import("./SelectionMenu-Dv2K-eoF.js");
+    const selectionMenuModule = await import("./SelectionMenu-jDr1DbM1.js");
     additionalComponents.SelectionMenu = selectionMenuModule.default || selectionMenuModule;
   } catch (e) {
     console.warn("SelectionMenu component not found or failed to load", e);
   }
   try {
-    const productLayoutModule = await import("./ProductLayout-B5jeFtH1.js");
+    const productLayoutModule = await import("./ProductLayout-7yS6X1oE.js");
     additionalComponents.ProductLayout = productLayoutModule.default || productLayoutModule;
   } catch (e) {
     console.warn("ProductLayout component not found or failed to load", e);
@@ -786,4 +786,4 @@ export {
   loadAdditionalComponents as l,
   wrappers as w
 };
-//# sourceMappingURL=index-8gPyMbfT.js.map
+//# sourceMappingURL=index-2arlkGxx.js.map

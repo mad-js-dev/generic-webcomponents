@@ -9,13 +9,26 @@ A collection of reusable web components that work seamlessly across different fr
 - TypeScript support
 - Lightweight and dependency-free
 - Simple and intuitive API
-- Works with React and Vue out of the box
+- First-class support for React and Vue
 
 ## Installation
 
+### Core Package
+
 ```bash
-# Install the package
-npm install your-package-name
+npm install @mad-js-dev/generic-webcomponents
+```
+
+### Peer Dependencies
+
+For React:
+```bash
+npm install react react-dom
+```
+
+For Vue 3:
+```bash
+npm install vue@^3.0.0
 ```
 
 ## Usage
@@ -24,7 +37,7 @@ npm install your-package-name
 
 ```html
 <script type="module">
-  import 'your-package-name';
+  import '@mad-js-dev/generic-webcomponents';
 </script>
 
 <collapsible-list>
@@ -42,19 +55,10 @@ npm install your-package-name
 
 ### React
 
-First, install the required peer dependencies:
-
-```bash
-npm install react react-dom
-```
-
-Then use the React wrappers in your components:
+#### Option 1: Using React Components (Recommended)
 
 ```jsx
-import React from 'react';
-import { ReactWrappers } from 'your-package-name';
-
-const { CollapsibleList, CollapsibleItem } = ReactWrappers;
+import { CollapsibleList, CollapsibleItem } from '@mad-js-dev/generic-webcomponents/react';
 
 function App() {
   return (
@@ -75,27 +79,48 @@ function App() {
 export default App;
 ```
 
-### Vue 3
+#### Option 2: Using Web Components Directly
 
-First, install the required peer dependencies:
+```jsx
+import { useEffect, useRef } from 'react';
+import '@mad-js-dev/generic-webcomponents';
 
-```bash
-npm install vue@next
+function App() {
+  return (
+    <collapsible-list>
+      <collapsible-item>Item 1</collapsible-item>
+      <collapsible-item>
+        Parent Item
+        <collapsible-list>
+          <collapsible-item>Child 1</collapsible-item>
+          <collapsible-item>Child 2</collapsible-item>
+        </collapsible-list>
+      </collapsible-item>
+      <collapsible-item>Item 3</collapsible-item>
+    </collapsible-list>
+  );
+}
+
+export default App;
 ```
 
-Then install the plugin in your main application file:
+### Vue 3
+
+#### Option 1: Using Vue Plugin (Recommended)
+
+In your main application file:
 
 ```js
 import { createApp } from 'vue';
 import App from './App.vue';
-import { VuePlugin } from 'your-package-name';
+import { VuePlugin } from '@mad-js-dev/generic-webcomponents/vue';
 
 const app = createApp(App);
 app.use(VuePlugin);
 app.mount('#app');
 ```
 
-Now you can use the components in your Vue templates:
+Then in your components:
 
 ```vue
 <template>
@@ -113,6 +138,32 @@ Now you can use the components in your Vue templates:
 </template>
 
 <script>
+export default {
+  name: 'MyComponent'
+}
+</script>
+```
+
+#### Option 2: Using Web Components Directly
+
+```vue
+<template>
+  <collapsible-list>
+    <collapsible-item>Item 1</collapsible-item>
+    <collapsible-item>
+      Parent Item
+      <collapsible-list>
+        <collapsible-item>Child 1</collapsible-item>
+        <collapsible-item>Child 2</collapsible-item>
+      </collapsible-list>
+    </collapsible-item>
+    <collapsible-item>Item 3</collapsible-item>
+  </collapsible-list>
+</template>
+
+<script>
+import '@mad-js-dev/generic-webcomponents';
+
 export default {
   name: 'MyComponent'
 }
