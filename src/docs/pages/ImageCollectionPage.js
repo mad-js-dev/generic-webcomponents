@@ -9,7 +9,7 @@ export default class ImageCollectionPage extends HTMLElement {
   }
 
   async connectedCallback() {
-    await this.render();
+    await this.render();ImageCollection
     
     // Set images after the component is rendered
     requestAnimationFrame(() => {

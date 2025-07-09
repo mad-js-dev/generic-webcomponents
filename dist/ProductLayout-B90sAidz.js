@@ -1,4 +1,4 @@
-import "./index-2arlkGxx.js";
+import "./index-C3Ea3XMP.js";
 class ImageCollection extends HTMLElement {
   static get observedAttributes() {
     return ["images"];
@@ -394,4 +394,4 @@ if (typeof window !== "undefined" && !customElements.get("product-layout")) {
 export {
   ProductLayout
 };
-//# sourceMappingURL=ProductLayout-7yS6X1oE.js.map
+//# sourceMappingURL=ProductLayout-B90sAidz.js.map

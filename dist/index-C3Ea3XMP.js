@@ -1,5 +1,5 @@
-import { forwardRef, useRef, useEffect } from "react";
-class CollapsibleList extends HTMLElement {
+import { forwardRef, useRef, useMemo, useEffect } from "react";
+let CollapsibleList$1 = class CollapsibleList extends HTMLElement {
   static get observedAttributes() {
     return ["reverse-heading", "single-item", "accordion"];
   }
@@ -214,11 +214,11 @@ class CollapsibleList extends HTMLElement {
       }
     }
   }
-}
+};
 if (!customElements.get("collapsible-list")) {
-  customElements.define("collapsible-list", CollapsibleList);
+  customElements.define("collapsible-list", CollapsibleList$1);
 }
-class IconLabel extends HTMLElement {
+let IconLabel$1 = class IconLabel extends HTMLElement {
   static get observedAttributes() {
     return ["icon", "label", "reverse"];
   }
@@ -373,11 +373,11 @@ class IconLabel extends HTMLElement {
         break;
     }
   }
-}
+};
 if (!customElements.get("icon-label")) {
-  customElements.define("icon-label", IconLabel);
+  customElements.define("icon-label", IconLabel$1);
 }
-class CollapsibleItem extends HTMLLIElement {
+let CollapsibleItem$1 = class CollapsibleItem extends HTMLLIElement {
   static get observedAttributes() {
     return ["expanded", "icon", "label", "removeshift", "hide-icon"];
   }
@@ -639,29 +639,29 @@ class CollapsibleItem extends HTMLLIElement {
       }
     }
   }
-}
+};
 const elementName = "collapsible-item";
 if (typeof window !== "undefined" && window.customElements) {
   if (window.customElements.get(elementName)) {
     window.customElements.get(elementName);
     delete window.customElements._elements[elementName];
   }
-  window.customElements.define(elementName, CollapsibleItem, { extends: "li" });
+  window.customElements.define(elementName, CollapsibleItem$1, { extends: "li" });
 }
-const CollapsibleItem$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const CollapsibleItem$2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  CollapsibleItem
+  CollapsibleItem: CollapsibleItem$1
 }, Symbol.toStringTag, { value: "Module" }));
 let additionalComponents = {};
 async function loadAdditionalComponents() {
   try {
-    const selectionMenuModule = await import("./SelectionMenu-jDr1DbM1.js");
+    const selectionMenuModule = await import("./SelectionMenu-CnTBwunN.js");
     additionalComponents.SelectionMenu = selectionMenuModule.default || selectionMenuModule;
   } catch (e) {
     console.warn("SelectionMenu component not found or failed to load", e);
   }
   try {
-    const productLayoutModule = await import("./ProductLayout-7yS6X1oE.js");
+    const productLayoutModule = await import("./ProductLayout-B90sAidz.js");
     additionalComponents.ProductLayout = productLayoutModule.default || productLayoutModule;
   } catch (e) {
     console.warn("ProductLayout component not found or failed to load", e);
@@ -673,117 +673,119 @@ function getAdditionalComponents() {
 }
 const webComponents = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  CollapsibleItem,
-  CollapsibleList,
+  CollapsibleItem: CollapsibleItem$1,
+  CollapsibleList: CollapsibleList$1,
   getAdditionalComponents,
   loadAdditionalComponents
 }, Symbol.toStringTag, { value: "Module" }));
+const createReactWrapper = (componentName, webComponent) => {
+  const ReactComponent = forwardRef(({ children, ...props }, ref) => {
+    const elementRef = useRef(null);
+    const eventHandlers = useRef({});
+    const tagName = webComponent.is || componentName.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+    const { elementProps, eventListeners } = useMemo(() => {
+      const elementProps2 = {};
+      const eventListeners2 = {};
+      Object.entries(props).forEach(([key, value]) => {
+        if (typeof value === "function" && key.startsWith("on")) {
+          const eventName = key.substring(2).toLowerCase();
+          eventListeners2[eventName] = value;
+        } else if (key !== "children") {
+          elementProps2[key] = value;
+        }
+      });
+      return { elementProps: elementProps2, eventListeners: eventListeners2 };
+    }, [props]);
+    useEffect(() => {
+      const element = elementRef.current;
+      if (!element) return;
+      const currentHandlers = {};
+      Object.entries(eventListeners).forEach(([eventName, handler]) => {
+        const wrappedHandler = (event) => {
+          const syntheticEvent = {
+            ...event,
+            nativeEvent: event,
+            currentTarget: element,
+            target: event.target,
+            preventDefault() {
+              event.preventDefault();
+            },
+            stopPropagation() {
+              event.stopPropagation();
+            }
+          };
+          handler(syntheticEvent);
+        };
+        element.addEventListener(eventName, wrappedHandler);
+        currentHandlers[eventName] = wrappedHandler;
+      });
+      const previousHandlers = eventHandlers.current;
+      eventHandlers.current = currentHandlers;
+      return () => {
+        Object.entries(previousHandlers).forEach(([eventName, handler]) => {
+          if (currentHandlers[eventName] !== handler) {
+            element.removeEventListener(eventName, handler);
+          }
+        });
+      };
+    }, [eventListeners]);
+    useEffect(() => {
+      if (!ref) return;
+      if (typeof ref === "function") {
+        ref(elementRef.current);
+      } else if (ref && typeof ref === "object") {
+        ref.current = elementRef.current;
+      }
+    }, [ref]);
+    const processedProps = useMemo(() => {
+      const result = { ...elementProps };
+      Object.keys(result).forEach((key) => {
+        if (result[key] === true) {
+          result[key] = "";
+        } else if (result[key] === false || result[key] === null || result[key] === void 0) {
+          delete result[key];
+        }
+      });
+      return result;
+    }, [elementProps]);
+    try {
+      return /* @__PURE__ */ React.createElement("tag-name", { is: tagName, ref: elementRef, ...processedProps }, children);
+    } catch (error) {
+      console.error(`Error rendering ${componentName}:`, error);
+      return null;
+    }
+  });
+  ReactComponent.displayName = componentName;
+  ReactComponent.webComponent = webComponent;
+  return ReactComponent;
+};
 const wrappers = {};
 Object.entries(webComponents).forEach(([componentName, webComponent]) => {
   if (typeof webComponent === "function" && webComponent.name) {
-    const ReactComponent = forwardRef(({ children, ...props }, ref) => {
-      const elementRef = useRef(null);
-      const eventHandlers = useRef({});
-      useEffect(() => {
-        const element = elementRef.current;
-        const currentEventHandlers = {};
-        Object.entries(props).forEach(([key, value]) => {
-          if (typeof value === "function" && key.startsWith("on")) {
-            const eventName = key.substring(2).toLowerCase();
-            const handler = (e) => {
-              value(e);
-            };
-            element.addEventListener(eventName, handler);
-            currentEventHandlers[eventName] = handler;
-          }
-        });
-        eventHandlers.current = currentEventHandlers;
-        return () => {
-          Object.entries(eventHandlers.current).forEach(([eventName, handler]) => {
-            element.removeEventListener(eventName, handler);
-          });
-        };
-      }, [props]);
-      const elementProps = Object.entries(props).reduce((acc, [key, value]) => {
-        if (!(typeof value === "function" && key.startsWith("on"))) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
-      useEffect(() => {
-        if (ref) {
-          if (typeof ref === "function") {
-            ref(elementRef.current);
-          } else {
-            ref.current = elementRef.current;
-          }
-        }
-      }, [ref]);
-      const TagName = webComponent.is || componentName.toLowerCase();
-      return /* @__PURE__ */ React.createElement(TagName, { ref: elementRef, ...elementProps }, children);
-    });
-    ReactComponent.displayName = componentName;
-    wrappers[componentName] = ReactComponent;
+    try {
+      wrappers[componentName] = createReactWrapper(componentName, webComponent);
+    } catch (error) {
+      console.error(`Failed to create React wrapper for ${componentName}:`, error);
+    }
   }
 });
-const VuePlugin = {
-  install(app) {
-    Object.entries(webComponents).forEach(([componentName, webComponent]) => {
-      if (typeof webComponent === "function" && webComponent.name) {
-        const tagName = webComponent.is || componentName.toLowerCase();
-        const vueComponent = {
-          name: componentName,
-          inheritAttrs: false,
-          emits: [],
-          // Will be populated with event names
-          props: {},
-          render() {
-            const attrs = Object.entries(this.$attrs).reduce((acc, [key, value]) => {
-              const camelKey = key.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-              acc[camelKey] = value;
-              return acc;
-            }, {});
-            const on = {};
-            Object.keys(this.$listeners).forEach((event) => {
-              on[event] = this.$listeners[event];
-            });
-            return this.$createElement(
-              tagName,
-              {
-                attrs,
-                on,
-                ref: "webComponent"
-              },
-              this.$slots.default
-            );
-          }
-        };
-        app.component(componentName, vueComponent);
-      }
-    });
-  }
-};
-const Components = {
-  // Core components are already available via default export
-  ...getAdditionalComponents(),
-  // Method to load additional components
-  async load() {
-    await loadAdditionalComponents();
-    Object.assign(this, getAdditionalComponents());
-    return this;
-  }
-};
-if (typeof window !== "undefined") {
-  Components.load().catch(console.error);
-}
+const {
+  IconLabel: IconLabel2,
+  CollapsibleItem: CollapsibleItem2,
+  CollapsibleList: CollapsibleList2,
+  ImageCollection,
+  SelectionMenu,
+  ProductLayout,
+  ...restComponents
+} = wrappers;
 export {
-  Components as C,
-  VuePlugin as V,
-  CollapsibleList as a,
-  CollapsibleItem as b,
-  CollapsibleItem$1 as c,
-  getAdditionalComponents as g,
-  loadAdditionalComponents as l,
+  CollapsibleItem2 as C,
+  IconLabel2 as I,
+  ProductLayout as P,
+  SelectionMenu as S,
+  CollapsibleList2 as a,
+  ImageCollection as b,
+  CollapsibleItem$2 as c,
   wrappers as w
 };
-//# sourceMappingURL=index-2arlkGxx.js.map
+//# sourceMappingURL=index-C3Ea3XMP.js.map
