@@ -1,6 +1,6 @@
 {
   "name": "@mad-js-dev/generic-webcomponents",
-  "version": "0.1.5",
+  "version": "0.1.10",
   "description": "A collection of reusable web components that work across different frameworks",
   "repository": {
     "type": "git",
@@ -18,7 +18,8 @@
   ],
   "files": [
     "dist",
-    "types"
+    "types",
+    "src/wrappers/react/index.d.ts"
   ],
   "types": "./types/index.d.ts",
   "main": "dist/index.umd.js",
@@ -31,33 +32,36 @@
       "require": "./dist/index.umd.js"
     },
     "./react": {
-      "types": "./types/wrappers/react/index.d.ts",
-      "import": "./src/wrappers/react/index.jsx"
+      "types": "./src/wrappers/react/index.d.ts",
+      "import": "./dist/react/index.es.js",
+      "require": "./dist/react/index.umd.js"
     },
     "./vue": {
-      "types": "./types/wrappers/vue/index.d.ts",
-      "import": "./src/wrappers/vue/index.js"
+      "types": "./src/wrappers/vue/index.d.ts",
+      "import": "./dist/vue/index.es.js",
+      "require": "./dist/vue/index.umd.js"
     },
     "./components/*": "./src/components/*/index.js"
   },
   "browser": "dist/index.umd.js",
   "scripts": {
     "dev": "vite --config vite.config.js",
-    "docs": "vite --config vite.config.js --mode docs",
-    "start": "vite preview --config vite.config.js",
-    "build": "npm run build:core && npm run build:react",
+    "docs:dev": "vite --config vite.config.js --mode docs",
+    "build": "npm run clean && npm run build:core && npm run build:wrappers",
     "build:core": "vite build --mode production",
-    "build:react": "cross-env BUILD_TARGET=react vite build --mode production",
-    "build:types": "tsc --emitDeclarationOnly --declaration --allowJs --esModuleInterop --outDir dist/types",
+    "build:wrappers": "npm run build:react && npm run build:vue",
+    "build:react": "vite build --config vite.react.config.js",
+    "build:vue": "vite build --config vite.vue.config.js",
     "build:docs": "vite build --mode docs",
-    "preview:docs": "vite preview --port 4173 --outDir docs",
-    "predeploy": "npm run build:docs",
-    "deploy": "node gh-pages.js",
-    "preview": "vite preview --config vite.config.js",
-    "prepare": "npm run build",
+    "clean": "rimraf dist",
+    "preview": "vite preview",
+    "preview:docs": "vite preview --port 4173",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "predeploy": "npm run build:docs",
+    "deploy": "node gh-pages.js",
+    "prepare": "husky install",
     "prepublishOnly": "npm run build"
   },
   "jest": {
@@ -94,6 +98,7 @@
     }
   },
   "devDependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.27.1",
     "@babel/plugin-transform-runtime": "^7.27.4",
     "@babel/preset-env": "^7.27.2",
     "@testing-library/dom": "^10.4.0",
@@ -101,20 +106,23 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.19",
-    "@types/react": "^18.2.56",
-    "@types/react-dom": "^18.2.19",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.6.0",
+    "@vitejs/plugin-vue": "^6.0.0",
     "babel-jest": "^30.0.0",
     "cross-env": "^7.0.3",
     "gh-pages": "^6.3.0",
+    "husky": "^9.1.7",
     "jest": "^30.0.0",
     "jest-environment-jsdom": "^30.0.0",
     "terser": "^5.43.1",
-    "typescript": "^5.3.3",
+    "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vite-plugin-dts": "^3.7.1"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.5.2",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "rimraf": "^6.0.1"
   }
 }

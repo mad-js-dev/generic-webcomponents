@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import dts from 'vite-plugin-dts';
-import baseUrlPlugin from './vite.baseurl.js';
 
 // For ESM, __dirname isn't available, so we create it
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -68,104 +67,45 @@ export default defineConfig(({ command, mode }) => {
     };
   }
 
-  // Library build config
-  if (isBuild && !isDocs) {
-    const isReactBuild = process.env.BUILD_TARGET === 'react';
-    const entry = isReactBuild 
-      ? resolve(__dirname, 'src/wrappers/react/index.jsx')
-      : resolve(__dirname, 'src/index.js');
-    
-    const fileName = isReactBuild 
-      ? 'react'
-      : 'index';
-
-    return {
-      ...baseConfig,
-      plugins: [
-        dts({
-          insertTypesEntry: true,
-          include: isReactBuild 
-            ? ['src/wrappers/react/**/*'] 
-            : ['src/**/*', '!src/wrappers/react/**/*'],
-          exclude: ['**/__tests__/**', '**/*.test.js'],
-          outDir: isReactBuild ? 'dist/types/react' : 'dist/types',
-        }),
-      ],
-      build: {
-        outDir: 'dist',
-        lib: {
-          entry,
-          name: isReactBuild ? 'GenericWebComponentsReact' : 'GenericWebComponents',
-          fileName: (format) => {
-            const ext = format === 'es' ? 'mjs' : 'js';
-            return isReactBuild 
-              ? `react.${format}.${ext}`
-              : `index.${format}.${ext}`;
-          },
-          formats: ['es', 'umd'],
-        },
-        rollupOptions: {
-          // Make sure to externalize deps that shouldn't be bundled
-          external: isReactBuild 
-            ? ['react', 'react-dom'] 
-            : ['react', 'react-dom', 'vue'],
-          output: {
-            // Provide global variables to use in the UMD build
-            globals: isReactBuild
-              ? {
-                  react: 'React',
-                  'react-dom': 'ReactDOM',
-                }
-              : {
-                  react: 'React',
-                  'react-dom': 'ReactDOM',
-                  vue: 'Vue',
-                },
-          },
-        },
-        sourcemap: true,
-        minify: 'terser',
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
-          },
-        },
-      },
-    };
-  }
-
-  // Docs/dev server config
+  // Library build configuration
   return {
     ...baseConfig,
-    base: process.env.NODE_ENV === 'production' ? '/mad-js-dev-generic-webcomponents/' : '/',
-    server: {
-      port: 3001,
-      open: '/docs.html',
-      host: true,
-      hmr: {
-        overlay: false,
-        reload: true,
-      },
-    },
-    css: {
-      devSourcemap: false,
-    },
     build: {
       outDir: 'dist',
+      lib: {
+        entry: resolve(__dirname, 'src/index.js'),
+        name: 'GenericWebComponents',
+        fileName: (format) => `index.${format}.js`,
+        formats: ['es', 'umd']
+      },
       rollupOptions: {
-        input: {
-          main: resolve(__dirname, 'docs.html'),
-        },
+        external: ['react', 'react-dom', 'vue'],
         output: {
-          entryFileNames: 'assets/[name]-[hash].js',
-          chunkFileNames: 'assets/[name]-[hash].js',
-          assetFileNames: 'assets/[name]-[hash][extname]',
+          globals: {
+            react: 'React',
+            'react-dom': 'ReactDOM',
+            vue: 'Vue'
+          },
+          exports: 'named'
+        }
+      },
+      sourcemap: true,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
         },
       },
+      emptyOutDir: true
     },
-    preview: {
-      port: 3001,
-    },
+    plugins: [
+      dts({
+        insertTypesEntry: true,
+        include: ['src/**/*'],
+        exclude: ['**/__tests__/**', '**/*.test.js', '**/wrappers/**'],
+        outDir: 'dist/types'
+      })
+    ]
   };
 });

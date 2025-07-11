@@ -1,162 +1,104 @@
-import { useEffect, useRef, forwardRef, useMemo } from 'react';
-import * as webComponents from '../../components';
+/// src/wrappers/react/index.jsx
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import { defineCustomElements } from '../../init.js';
 
-/**
- * Creates a React wrapper for a web component
- * @param {string} componentName - The name of the component
- * @param {Function} webComponent - The web component constructor
- * @returns {Function} React component
- */
-const createReactWrapper = (componentName, webComponent) => {
-  const ReactComponent = forwardRef(({ children, ...props }, ref) => {
-    const elementRef = useRef(null);
-    const eventHandlers = useRef({});
-    const tagName = webComponent.is || componentName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+// Initialize web components when the module is loaded
+defineCustomElements().catch(console.error);
 
-    // Memoize props to prevent unnecessary effect runs
-    const { elementProps, eventListeners } = useMemo(() => {
-      const elementProps = {};
-      const eventListeners = {};
-
-      Object.entries(props).forEach(([key, value]) => {
-        if (typeof value === 'function' && key.startsWith('on')) {
-          const eventName = key.substring(2).toLowerCase();
-          eventListeners[eventName] = value;
-        } else if (key !== 'children') {
-          elementProps[key] = value;
-        }
-      });
-
-      return { elementProps, eventListeners };
-    }, [props]);
-
-    // Handle event listeners
-    useEffect(() => {
-      const element = elementRef.current;
-      if (!element) return;
-
-      const currentHandlers = {};
-
-      // Add new event listeners
-      Object.entries(eventListeners).forEach(([eventName, handler]) => {
-        const wrappedHandler = (event) => {
-          // Create a synthetic event-like object for better React compatibility
-          const syntheticEvent = {
-            ...event,
-            nativeEvent: event,
-            currentTarget: element,
-            target: event.target,
-            preventDefault() {
-              event.preventDefault();
-            },
-            stopPropagation() {
-              event.stopPropagation();
-            },
-          };
-
-          handler(syntheticEvent);
-        };
-
-        element.addEventListener(eventName, wrappedHandler);
-        currentHandlers[eventName] = wrappedHandler;
-      });
-
-      // Store current handlers for cleanup
-      const previousHandlers = eventHandlers.current;
-      eventHandlers.current = currentHandlers;
-
-      // Cleanup function
-      return () => {
-        // Remove only the handlers that are no longer needed
-        Object.entries(previousHandlers).forEach(([eventName, handler]) => {
-          if (currentHandlers[eventName] !== handler) {
-            element.removeEventListener(eventName, handler);
-          }
-        });
-      };
-    }, [eventListeners]);
-
-    // Handle ref forwarding
-    useEffect(() => {
-      if (!ref) return;
-      
-      if (typeof ref === 'function') {
-        ref(elementRef.current);
-      } else if (ref && typeof ref === 'object') {
-        ref.current = elementRef.current;
-      }
-    }, [ref]);
-
-    // Handle boolean attributes
-    const processedProps = useMemo(() => {
-      const result = { ...elementProps };
-      
-      // Convert boolean values to empty strings for web component boolean attributes
-      Object.keys(result).forEach(key => {
-        if (result[key] === true) {
-          result[key] = ''; // Empty string makes the attribute present without a value
-        } else if (result[key] === false || result[key] === null || result[key] === undefined) {
-          delete result[key]; // Remove falsy values to unset the attribute
-        }
-      });
-      
-      return result;
-    }, [elementProps]);
-
-    try {
-      return (
-        <tag-name is={tagName} ref={elementRef} {...processedProps}>
-          {children}
-        </tag-name>
-      );
-    } catch (error) {
-      console.error(`Error rendering ${componentName}:`, error);
-      return null;
-    }
-  });
-
-  // Set display name for better debugging
-  ReactComponent.displayName = componentName;
-  
-  // Add a reference to the original web component
-  ReactComponent.webComponent = webComponent;
-  
-  return ReactComponent;
+// Handle icon path resolution for React
+const resolveIconPath = (icon) => {
+  if (!icon) return '';
+  // If it's a full URL or data URI, use as is
+  if (icon.startsWith('http') || icon.startsWith('data:') || icon.startsWith('blob:')) {
+    return icon;
+  }
+  // For local paths, assume they're relative to the public folder in the consuming app
+  return icon;
 };
 
-// Auto-generate React wrappers for all web components
-const wrappers = {};
-
-Object.entries(webComponents).forEach(([componentName, webComponent]) => {
-  if (typeof webComponent === 'function' && webComponent.name) {
-    try {
-      wrappers[componentName] = createReactWrapper(componentName, webComponent);
-    } catch (error) {
-      console.error(`Failed to create React wrapper for ${componentName}:`, error);
-    }
-  }
-});
-
-// Export individual components for better tree-shaking
-const {
-  IconLabel,
-  CollapsibleItem,
-  CollapsibleList,
-  ImageCollection,
-  SelectionMenu,
-  ProductLayout,
-  ...restComponents
-} = wrappers;
+// Create React wrappers for each web component
+const createReactWrapper = (tagName) => {
+  const Component = forwardRef(({ children, ...props }, ref) => {
+    const elementRef = useRef(null);
+    
+    // Handle ref forwarding
+    React.useImperativeHandle(ref, () => elementRef.current);
+    
+    // Convert React props to web component attributes/events
+    const elementProps = Object.entries(props).reduce((acc, [key, value]) => {
+      // Handle events (onEvent -> onevent)
+      if (key.startsWith('on') && key[2] === key[2].toUpperCase()) {
+        const eventName = key[2].toLowerCase() + key.slice(3);
+        return { ...acc, [eventName]: value };
+      }
+      // Handle className -> class
+      if (key === 'className') {
+        return { ...acc, class: value };
+      }
+      // Handle style object
+      if (key === 'style' && typeof value === 'object') {
+        return { ...acc, style: value };
+      }
+      // Special handling for icon prop
+      if (key === 'icon') {
+        return { ...acc, icon: resolveIconPath(value) };
+      }
+      // Pass through other props
+      return { ...acc, [key]: value };
+    }, {});
+    
+    // Handle ref and props
+    const elementPropsWithRef = {
+      ...elementProps,
+      ref: (element) => {
+        if (element) {
+          elementRef.current = element;
+          
+          // Forward the ref if it's a function
+          if (typeof ref === 'function') {
+            ref(element);
+          } else if (ref) {
+            ref.current = element;
+          }
+        }
+      }
+    };
+    
+    return React.createElement(tagName, elementPropsWithRef, children);
+  });
+  
+  // Set display name for better debugging
+  Component.displayName = tagName;
+  
+  return Component;
+};
 
 // Export all components as named exports
-export { 
-  IconLabel,
-  CollapsibleItem,
+const CollapsibleList = createReactWrapper('collapsible-list');
+const CollapsibleItem = createReactWrapper('collapsible-item');
+const IconLabel = createReactWrapper('icon-label');
+const SelectionMenu = createReactWrapper('selection-menu');
+const ImageCollection = createReactWrapper('image-collection');
+const ProductLayout = createReactWrapper('product-layout');
+
+// Export all components as named exports
+export {
   CollapsibleList,
-  ImageCollection,
+  CollapsibleItem,
+  IconLabel,
   SelectionMenu,
-  ProductLayout 
+  ImageCollection,
+  ProductLayout,
+  defineCustomElements
 };
 
-// Export all components as default
-export default wrappers;
+// Default export with all components
+export default {
+  CollapsibleList,
+  CollapsibleItem,
+  IconLabel,
+  SelectionMenu,
+  ImageCollection,
+  ProductLayout,
+  defineCustomElements
+};

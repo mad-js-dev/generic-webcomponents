@@ -1,7 +1,10 @@
 import * as webComponents from '../../components';
+import { defineCustomElements } from '../../init.js';
 
 const VuePlugin = {
   install(app) {
+    // Initialize web components
+    defineCustomElements().catch(console.error);
     // Register all web components as Vue components
     Object.entries(webComponents).forEach(([componentName, webComponent]) => {
       if (typeof webComponent === 'function' && webComponent.name) {
