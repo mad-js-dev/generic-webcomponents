@@ -1221,6 +1221,31 @@ const createReactWrapper = (tagName) => {
         hideIcon,
         ...restProps
       } = props;
+      const elementRef2 = useRef(null);
+      React.useEffect(() => {
+        if (elementRef2.current) {
+          if (expanded) {
+            elementRef2.current.setAttribute("expanded", "");
+          } else {
+            elementRef2.current.removeAttribute("expanded");
+          }
+        }
+      }, [expanded]);
+      const handleRef2 = (el) => {
+        elementRef2.current = el;
+        if (ref) {
+          if (typeof ref === "function") {
+            ref(el);
+          } else if (ref) {
+            ref.current = el;
+          }
+        }
+        if (el) {
+          el.addEventListener("toggle", (e) => {
+            if (onToggle) onToggle(e);
+          });
+        }
+      };
       const headerContent = React.createElement("div", {
         className: "collapsible-item__header",
         slot: "header",
@@ -1247,11 +1272,12 @@ const createReactWrapper = (tagName) => {
         slot: "content"
       }, children);
       return React.createElement(tagName, {
-        ref: handleRef,
+        ref: handleRef2,
         ...restProps,
         class: className,
         style,
-        "expanded": expanded,
+        "expanded": expanded ? "" : void 0,
+        // Use empty string for true, undefined for false
         "icon": icon,
         "label": label,
         "removeshift": removeshift,

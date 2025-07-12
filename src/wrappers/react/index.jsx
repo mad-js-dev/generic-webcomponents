@@ -72,6 +72,39 @@ const createReactWrapper = (tagName) => {
     // Special handling for collapsible-item
     if (tagName === 'collapsible-item') {
       const { expanded, icon, label, removeshift, hideIcon, ...restProps } = props;
+      const elementRef = useRef(null);
+      
+      // Keep the web component's expanded state in sync with the prop
+      React.useEffect(() => {
+        if (elementRef.current) {
+          if (expanded) {
+            elementRef.current.setAttribute('expanded', '');
+          } else {
+            elementRef.current.removeAttribute('expanded');
+          }
+        }
+      }, [expanded]);
+      
+      // Handle ref forwarding and event listeners
+      const handleRef = (el) => {
+        elementRef.current = el;
+        
+        // Forward the ref
+        if (ref) {
+          if (typeof ref === 'function') {
+            ref(el);
+          } else if (ref) {
+            ref.current = el;
+          }
+        }
+        
+        // Add event listeners for collapsible-item
+        if (el) {
+          el.addEventListener('toggle', (e) => {
+            if (onToggle) onToggle(e);
+          });
+        }
+      };
       
       // Create the header content
       const headerContent = React.createElement('div', {
@@ -107,7 +140,7 @@ const createReactWrapper = (tagName) => {
         ...restProps,
         class: className,
         style: style,
-        'expanded': expanded,
+        'expanded': expanded ? '' : undefined, // Use empty string for true, undefined for false
         'icon': icon,
         'label': label,
         'removeshift': removeshift,
