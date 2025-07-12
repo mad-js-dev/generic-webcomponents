@@ -1,5 +1,6 @@
-/* empty css                    */
-class h extends HTMLLIElement {
+import "../../atoms/icon-label/IconLabel.js";
+/* empty css                                                              */
+class r extends HTMLLIElement {
   static get observedAttributes() {
     return ["expanded", "icon", "label", "removeshift", "hide-icon"];
   }
@@ -116,8 +117,8 @@ class h extends HTMLLIElement {
   }
 }
 const d = "collapsible-item";
-typeof window < "u" && window.customElements && (window.customElements.get(d) && (window.customElements.get(d), delete window.customElements._elements[d]), window.customElements.define(d, h, { extends: "li" }));
+typeof window < "u" && window.customElements && (window.customElements.get(d) && (window.customElements.get(d), delete window.customElements._elements[d]), window.customElements.define(d, r, { extends: "li" }));
 export {
-  h as CollapsibleItem
+  r as CollapsibleItem
 };
 //# sourceMappingURL=CollapsibleItem.js.map

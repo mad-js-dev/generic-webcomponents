@@ -1,6 +1,6 @@
 {
   "name": "@mad-js-dev/generic-webcomponents",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A collection of reusable web components that work across different frameworks",
   "repository": {
     "type": "git",
@@ -17,12 +17,14 @@
     "collapsible"
   ],
   "files": [
-    "dist",
-    "types"
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.css",
+    "dist/**/*.map"
   ],
   "types": "./dist/types/index.d.ts",
-  "main": "./dist/index.es.js",
-  "module": "./dist/index.es.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "type": "module",
   "sideEffects": false,
   "exports": {

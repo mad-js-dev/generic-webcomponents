@@ -1,3 +1,4 @@
+import "../../organisms/image-collection/ImageCollection.js";
 const s = [
   {
     title: "Nature",
