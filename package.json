@@ -1,6 +1,6 @@
 {
   "name": "@mad-js-dev/generic-webcomponents",
-  "version": "0.1.17",
+  "version": "0.2.0",
   "description": "A collection of reusable web components that work across different frameworks",
   "repository": {
     "type": "git",
@@ -17,52 +17,42 @@
     "collapsible"
   ],
   "files": [
-    "dist",
-    "types",
-    "src/wrappers/react/index.d.ts"
+    "dist/components",
+    "dist/types"
   ],
   "types": "./types/index.d.ts",
-  "main": "dist/index.umd.js",
+  "main": "dist/index.es.js",
   "module": "dist/index.es.js",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.umd.js"
+      "default": "./dist/index.es.js"
     },
-    "./react": {
-      "types": "./src/wrappers/react/index.d.ts",
-      "import": "./dist/react/index.es.js",
-      "require": "./dist/react/index.umd.js"
+    "./components": {
+      "types": "./dist/types/components/index.d.ts",
+      "import": "./dist/components/index.js",
+      "default": "./dist/components/index.js"
     },
-    "./vue": {
-      "types": "./src/wrappers/vue/index.d.ts",
-      "import": "./dist/vue/index.es.js",
-      "require": "./dist/vue/index.umd.js"
-    },
-    "./components/*": "./src/components/*/index.js"
+    "./components/*": {
+      "types": "./dist/types/components/*/index.d.ts",
+      "import": "./dist/components/*.js",
+      "default": "./dist/components/*.js"
+    }
   },
-  "browser": "dist/index.umd.js",
+  "browser": "./dist/index.es.js",
   "scripts": {
-    "dev": "vite --config vite.config.js",
-    "docs:dev": "vite --config vite.config.js --mode docs",
-    "build": "npm run clean && npm run build:core && npm run build:wrappers",
-    "build:core": "vite build --mode production",
-    "build:wrappers": "npm run build:react && npm run build:vue",
-    "build:react": "vite build --config vite.react.config.js",
-    "build:vue": "vite build --config vite.vue.config.js",
-    "build:docs": "vite build --mode docs",
+    "dev": "vite",
+    "build": "npm run clean && npm run build:components",
+    "build:components": "vite build --config vite.components.config.js",
     "clean": "rimraf dist",
-    "preview": "vite preview",
-    "preview:docs": "vite preview --port 4173",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky install",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "test:coverage": "jest --coverage",
     "predeploy": "npm run build:docs",
-    "deploy": "node gh-pages.js",
-    "prepare": "husky install",
-    "prepublishOnly": "npm run build"
+    "deploy": "node gh-pages.js"
   },
   "jest": {
     "testEnvironment": "jsdom",

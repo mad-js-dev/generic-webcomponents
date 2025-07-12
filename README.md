@@ -9,7 +9,8 @@ A collection of reusable web components that work seamlessly across different fr
 - TypeScript support
 - Lightweight and dependency-free
 - Simple and intuitive API
-- First-class support for React and Vue
+- Tree-shaking support
+- Optimized for modern bundlers
 
 ## Installation
 
@@ -33,11 +34,30 @@ npm install vue@^3.0.0
 
 ## Usage
 
+### Importing Components
+
+#### Import All Components
+
+```javascript
+import '@mad-js-dev/generic-webcomponents';
+```
+
+#### Import Specific Components
+
+```javascript
+import '@mad-js-dev/generic-webcomponents/components/collapsible-item';
+import '@mad-js-dev/generic-webcomponents/components/icon-label';
+// Other components...
+```
+
 ### Vanilla JavaScript/HTML
 
 ```html
 <script type="module">
   import '@mad-js-dev/generic-webcomponents';
+  
+  // Optional: Import specific component
+  // import '@mad-js-dev/generic-webcomponents/components/collapsible-item';
 </script>
 
 <collapsible-list>
