@@ -18,13 +18,40 @@ const resolveIconPath = (icon) => {
 
 // Create React wrappers for each web component
 const createReactWrapper = (tagName) => {
-  const Component = forwardRef(({ children, ...props }, ref) => {
+  const Component = forwardRef(({ children, style, className, ...props }, ref) => {
     const elementRef = useRef(null);
     
     // Handle ref forwarding
-    React.useImperativeHandle(ref, () => elementRef.current);
+    useImperativeHandle(ref, () => ({
+      ...(elementRef.current || {}),
+      // Add any component-specific methods here
+    }));
     
-    // Convert React props to web component attributes/events
+    // Special handling for icon-label to ensure proper styling
+    if (tagName === 'icon-label') {
+      return React.createElement(tagName, {
+        ref: (el) => {
+          elementRef.current = el;
+          if (ref) {
+            if (typeof ref === 'function') {
+              ref(el);
+            } else if (ref) {
+              ref.current = el;
+            }
+          }
+        },
+        ...props,
+        class: className,
+        style: {
+          '--icon-size': '24px', // Default size, can be overridden by style prop
+          ...(style || {})
+        },
+        'icon': props.icon ? resolveIconPath(props.icon) : undefined,
+        'label': props.label || ''
+      }, children);
+    }
+    
+    // For other components
     const elementProps = Object.entries(props).reduce((acc, [key, value]) => {
       // Handle events (onEvent -> onevent)
       if (key.startsWith('on') && key[2] === key[2].toUpperCase()) {

@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef } from "react";
+import React, { forwardRef, useRef, useImperativeHandle } from "react";
 let CollapsibleList$1 = class CollapsibleList extends HTMLElement {
   static get observedAttributes() {
     return ["reverse-heading", "single-item", "accordion"];
@@ -224,154 +224,82 @@ let IconLabel$1 = class IconLabel extends HTMLElement {
   }
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
     this._icon = "";
     this._label = "";
     this._reverse = false;
-    this._initialized = false;
   }
   connectedCallback() {
-    if (!this._initialized) {
-      this._initializeComponent();
-      this._initialized = true;
-    }
     this._render();
   }
-  _initializeComponent() {
-    const style = document.createElement("style");
-    style.textContent = `
-      :host {
-        display: inline-flex;
-        align-items: center;
-        font-family: inherit;
-        color: currentColor;
-      }
-
-      .icon-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .icon-label--reverse {
-        flex-direction: row-reverse;
-      }
-
-      .icon-label__icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1em;
-        height: 1em;
-      }
-      
-      .icon-label__icon img,
-      .icon-label__char {
-        width: 1em;
-        height: 1em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .icon-label__char {
-        font-size: 1em;
-        line-height: 1;
-      }
-    `;
-    const container = document.createElement("span");
-    container.className = "icon-label";
-    container.setAttribute("part", "container");
-    const iconSlot = document.createElement("slot");
-    iconSlot.name = "icon";
-    iconSlot.className = "icon-label__icon";
-    iconSlot.setAttribute("part", "icon");
-    const labelSlot = document.createElement("slot");
-    labelSlot.className = "icon-label__label";
-    labelSlot.setAttribute("part", "label");
-    container.appendChild(iconSlot);
-    container.appendChild(labelSlot);
-    this.shadowRoot.appendChild(style);
-    this.shadowRoot.appendChild(container);
-    this._container = container;
-    this._iconSlot = iconSlot;
-    this._labelSlot = labelSlot;
-  }
-  _render() {
-    if (!this._initialized) return;
-    this._container.className = "icon-label";
-    if (this._reverse) {
-      this._container.classList.add("icon-label--reverse");
-    }
-    if (this._icon && this._iconSlot) {
-      this._iconSlot.innerHTML = "";
-      const isIconChar = this._icon.length === 1 || this._icon.length === 2 && this._icon.codePointAt(0) > 65535;
-      if (isIconChar) {
-        const charSpan = document.createElement("span");
-        charSpan.className = "icon-label__char";
-        charSpan.textContent = this._icon;
-        this._iconSlot.appendChild(charSpan);
-      } else {
-        const img = document.createElement("img");
-        img.src = this._icon;
-        img.alt = "";
-        this._iconSlot.appendChild(img);
-      }
-    }
-    const labelText = this._label || this.textContent.trim();
-    if (labelText && this._labelSlot) {
-      this._labelSlot.textContent = "";
-      if (!this._label && this.textContent.trim()) {
-        while (this.firstChild) {
-          this._labelSlot.appendChild(this.firstChild);
-        }
-      } else {
-        this._labelSlot.textContent = labelText;
-      }
-    }
-  }
-  // Getters and setters for properties
   get icon() {
     return this._icon;
   }
   set icon(value) {
-    this._icon = value;
-    this.setAttribute("icon", value);
+    this._icon = value || "";
+    this._render();
   }
   get label() {
-    return this._label || this.textContent.trim();
+    return this._label;
   }
   set label(value) {
-    this._label = value;
-    if (this._labelSlot) {
-      this._labelSlot.textContent = value;
-    }
+    this._label = value || "";
+    this._render();
   }
   get reverse() {
     return this._reverse;
   }
   set reverse(value) {
-    this._reverse = value !== null && value !== false;
+    this._reverse = value !== null && value !== "false";
     this._render();
   }
-  // Handle attribute changes
+  _render() {
+    const container = document.createElement("span");
+    container.style.display = "inline-flex";
+    container.style.alignItems = "center";
+    container.style.gap = "0.5rem";
+    container.style.fontFamily = "inherit";
+    container.style.color = "currentColor";
+    if (this._reverse) {
+      container.style.flexDirection = "row-reverse";
+    }
+    if (this._icon) {
+      const isImage = this._icon.startsWith("data:") || this._icon.startsWith("http") || this._icon.startsWith("/") || /\.(png|jpg|jpeg|svg|gif|webp)(\?.*)?$/i.test(this._icon);
+      const icon = isImage ? document.createElement("img") : document.createElement("span");
+      icon.style.display = "inline-flex";
+      icon.style.alignItems = "center";
+      icon.style.justifyContent = "center";
+      icon.style.width = "1em";
+      icon.style.height = "1em";
+      if (isImage) {
+        icon.src = this._icon;
+        icon.alt = "";
+        icon.loading = "lazy";
+        icon.style.objectFit = "contain";
+      } else {
+        icon.textContent = this._icon;
+        icon.style.fontSize = "1em";
+        icon.style.lineHeight = "1";
+      }
+      container.appendChild(icon);
+    }
+    if (this._label) {
+      const label = document.createElement("span");
+      label.textContent = this._label;
+      container.appendChild(label);
+    }
+    this.innerHTML = "";
+    this.appendChild(container);
+  }
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-    switch (name) {
-      case "icon":
-        this._icon = newValue || "";
-        break;
-      case "label":
-        this._label = newValue || "";
-        if (this._labelSlot) {
-          this._labelSlot.textContent = this._label;
-        }
-        break;
-      case "reverse":
-        this._reverse = newValue !== null;
-        this._render();
-        break;
+    if (name === "icon") {
+      this._icon = newValue || "";
+    } else if (name === "label") {
+      this._label = newValue || "";
+    } else if (name === "reverse") {
+      this._reverse = newValue !== null && newValue !== "false";
     }
+    this._render();
   }
 };
 if (!customElements.get("icon-label")) {
@@ -1380,6 +1308,16 @@ const ProductLayout$2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.def
   ProductLayout: ProductLayout$1
 }, Symbol.toStringTag, { value: "Module" }));
 function defineCustomElements() {
+  customElements.define("collapsible-list", CollapsibleList$1);
+  customElements.define("collapsible-item", CollapsibleItem$1, { extends: "li" });
+  customElements.define("icon-label", IconLabel$1);
+  customElements.define("selection-menu", SelectionMenu$1);
+  customElements.define("image-collection", ImageCollection$1);
+  customElements.define("product-layout", class extends HTMLElement {
+    constructor() {
+      super();
+    }
+  });
   return Promise.all([
     customElements.whenDefined("collapsible-list"),
     customElements.whenDefined("collapsible-item"),
@@ -1402,9 +1340,35 @@ const resolveIconPath = (icon) => {
   return icon;
 };
 const createReactWrapper = (tagName) => {
-  const Component = forwardRef(({ children, ...props }, ref) => {
+  const Component = forwardRef(({ children, style, className, ...props }, ref) => {
     const elementRef = useRef(null);
-    React.useImperativeHandle(ref, () => elementRef.current);
+    useImperativeHandle(ref, () => ({
+      ...elementRef.current || {}
+      // Add any component-specific methods here
+    }));
+    if (tagName === "icon-label") {
+      return React.createElement(tagName, {
+        ref: (el) => {
+          elementRef.current = el;
+          if (ref) {
+            if (typeof ref === "function") {
+              ref(el);
+            } else if (ref) {
+              ref.current = el;
+            }
+          }
+        },
+        ...props,
+        class: className,
+        style: {
+          "--icon-size": "24px",
+          // Default size, can be overridden by style prop
+          ...style || {}
+        },
+        "icon": props.icon ? resolveIconPath(props.icon) : void 0,
+        "label": props.label || ""
+      }, children);
+    }
     const elementProps = Object.entries(props).reduce((acc, [key, value]) => {
       if (key.startsWith("on") && key[2] === key[2].toUpperCase()) {
         const eventName = key[2].toLowerCase() + key.slice(3);
