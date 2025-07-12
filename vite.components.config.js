@@ -46,15 +46,51 @@ export default defineConfig({
     dts({
       tsConfigFilePath: 'tsconfig.json',
       insertTypesEntry: true,
-      include: ['src/components/**/*'],
+      include: ['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx'],
       outDir: 'dist/types',
       compilerOptions: {
         declaration: true,
         declarationMap: true,
-        emitDeclarationOnly: true
+        emitDeclarationOnly: true,
+        outDir: 'dist/types',
+        rootDir: 'src',
+        baseUrl: '.',
+        paths: {
+          '@/*': ['src/*']
+        }
       },
-      // Ensure proper module resolution
-      rollupTypes: true
+      rollupTypes: true,
+      copyDtsFiles: true
     })
-  ]
+  ],
+  build: {
+    lib: {
+      entry: resolve(__dirname, 'src/components/index.js'),
+      name: 'GenericWebComponents',
+      fileName: (format) => `index.${format}.js`,
+      formats: ['es']
+    },
+    rollupOptions: {
+      external: [],
+      output: {
+        dir: 'dist',
+        format: 'es',
+        preserveModules: true,
+        preserveModulesRoot: 'src',
+        entryFileNames: ({ name }) => {
+          if (name === 'index') return 'index.js';
+          return `components/${name}.js`;
+        },
+        chunkFileNames: 'chunks/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        exports: 'auto',
+        // Ensure proper module resolution for TypeScript
+        sourcemap: true,
+        sourcemapExcludeSources: true
+      }
+    },
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: true
+  },
 });
