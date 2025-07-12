@@ -1,1 +1,1 @@
-export function defineCustomElements(): Promise<[CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor]>;
+export function defineCustomElements(): Promise<void> | Promise<[CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor]>;

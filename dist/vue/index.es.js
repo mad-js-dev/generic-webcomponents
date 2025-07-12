@@ -141,7 +141,7 @@ class f extends HTMLElement {
   }
 }
 customElements.get("collapsible-list") || customElements.define("collapsible-list", f);
-class b extends HTMLElement {
+class g extends HTMLElement {
   static get observedAttributes() {
     return ["icon", "label", "reverse"];
   }
@@ -185,7 +185,7 @@ class b extends HTMLElement {
     i !== t && (e === "icon" ? this._icon = t || "" : e === "label" ? this._label = t || "" : e === "reverse" && (this._reverse = t !== null && t !== "false"), this._render());
   }
 }
-customElements.get("icon-label") || customElements.define("icon-label", b);
+customElements.get("icon-label") || customElements.define("icon-label", g);
 class p extends HTMLLIElement {
   static get observedAttributes() {
     return ["expanded", "icon", "label", "removeshift", "hide-icon"];
@@ -304,14 +304,14 @@ class p extends HTMLLIElement {
 }
 const m = "collapsible-item";
 typeof window < "u" && window.customElements && (window.customElements.get(m) && (window.customElements.get(m), delete window.customElements._elements[m]), window.customElements.define(m, p, { extends: "li" }));
-const x = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const v = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   CollapsibleItem: p
 }, Symbol.toStringTag, { value: "Module" }));
 let u = {};
-async function v() {
+async function C() {
   try {
-    const r = await Promise.resolve().then(() => w);
+    const r = await Promise.resolve().then(() => I);
     u.SelectionMenu = r.default || r;
   } catch (r) {
     console.warn("SelectionMenu component not found or failed to load", r);
@@ -324,22 +324,22 @@ async function v() {
   }
   return u;
 }
-function C() {
+function w() {
   return u;
 }
 const A = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   CollapsibleItem: p,
   CollapsibleList: f,
-  getAdditionalComponents: C,
-  loadAdditionalComponents: v
+  getAdditionalComponents: w,
+  loadAdditionalComponents: C
 }, Symbol.toStringTag, { value: "Module" }));
 class _ extends HTMLElement {
   static get observedAttributes() {
     return ["items", "selected"];
   }
   constructor() {
-    super(), this.attachShadow({ mode: "open" }), this._items = [], this._selectedId = null, this._boundOnItemClick = this._onItemClick.bind(this), Promise.resolve().then(() => x);
+    super(), this.attachShadow({ mode: "open" }), this._items = [], this._selectedId = null, this._boundOnItemClick = this._onItemClick.bind(this), Promise.resolve().then(() => v);
   }
   connectedCallback() {
     this._render();
@@ -503,8 +503,8 @@ class _ extends HTMLElement {
         const c = document.createElement("ul");
         c.className = "menu-item__child-list", c.innerHTML = this._renderItems(s.children, i + 1);
         const h = document.createElement("div");
-        h.slot = "content", h.className = "menu-item__content", h.appendChild(c), l.appendChild(h), l.addEventListener("toggle", (E) => {
-          h.style.display = E.detail.expanded ? "block" : "none";
+        h.slot = "content", h.className = "menu-item__content", h.appendChild(c), l.appendChild(h), l.addEventListener("toggle", (x) => {
+          h.style.display = x.detail.expanded ? "block" : "none";
         });
       } else {
         const a = document.createElement("span");
@@ -586,11 +586,11 @@ class _ extends HTMLElement {
   }
 }
 customElements.get("selection-menu") || customElements.define("selection-menu", _);
-const w = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const I = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   SelectionMenu: _
 }, Symbol.toStringTag, { value: "Module" }));
-class g extends HTMLElement {
+class E extends HTMLElement {
   static get observedAttributes() {
     return ["images"];
   }
@@ -754,9 +754,10 @@ class g extends HTMLElement {
         `);
   }
 }
-customElements.get("image-collection") || customElements.define("image-collection", g);
+customElements.get("image-collection") || customElements.define("image-collection", E);
+let b = !1;
 function y() {
-  return customElements.define("collapsible-list", f), customElements.define("collapsible-item", p, { extends: "li" }), customElements.define("icon-label", b), customElements.define("selection-menu", _), customElements.define("image-collection", g), customElements.define("product-layout", class extends HTMLElement {
+  return b || window.__GENERIC_WEBCOMPONENTS_DEFINED__ ? Promise.resolve() : (b = !0, window.__GENERIC_WEBCOMPONENTS_DEFINED__ = !0, customElements.get("collapsible-list") || customElements.define("collapsible-list", f), customElements.get("collapsible-item") || customElements.define("collapsible-item", p, { extends: "li" }), customElements.get("icon-label") || customElements.define("icon-label", g), customElements.get("selection-menu") || customElements.define("selection-menu", _), customElements.get("image-collection") || customElements.define("image-collection", E), customElements.get("product-layout") || customElements.define("product-layout", class extends HTMLElement {
     constructor() {
       super();
     }
@@ -767,10 +768,10 @@ function y() {
     customElements.whenDefined("selection-menu"),
     customElements.whenDefined("image-collection"),
     customElements.whenDefined("product-layout")
-  ]);
+  ]));
 }
 typeof window < "u" && !window.__GENERIC_WEBCOMPONENTS_DEFINED__ && (window.__GENERIC_WEBCOMPONENTS_DEFINED__ = !0, y().catch(console.error));
-const I = {
+const S = {
   install(r) {
     y().catch(console.error), Object.entries(A).forEach(([e, i]) => {
       if (typeof i == "function" && i.name) {
@@ -804,6 +805,6 @@ const I = {
   }
 };
 export {
-  I as default
+  S as default
 };
 //# sourceMappingURL=index.es.js.map

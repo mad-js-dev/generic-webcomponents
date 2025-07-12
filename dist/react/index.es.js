@@ -1124,19 +1124,37 @@ let ImageCollection$1 = class ImageCollection extends HTMLElement {
 if (!customElements.get("image-collection")) {
   customElements.define("image-collection", ImageCollection$1);
 }
+let elementsDefined = false;
 function defineCustomElements() {
-  customElements.define("collapsible-list", CollapsibleList$1);
-  customElements.define("collapsible-item", CollapsibleItem$1, {
-    extends: "li"
-  });
-  customElements.define("icon-label", IconLabel$1);
-  customElements.define("selection-menu", SelectionMenu$1);
-  customElements.define("image-collection", ImageCollection$1);
-  customElements.define("product-layout", class extends HTMLElement {
-    constructor() {
-      super();
-    }
-  });
+  if (elementsDefined || window.__GENERIC_WEBCOMPONENTS_DEFINED__) {
+    return Promise.resolve();
+  }
+  elementsDefined = true;
+  window.__GENERIC_WEBCOMPONENTS_DEFINED__ = true;
+  if (!customElements.get("collapsible-list")) {
+    customElements.define("collapsible-list", CollapsibleList$1);
+  }
+  if (!customElements.get("collapsible-item")) {
+    customElements.define("collapsible-item", CollapsibleItem$1, {
+      extends: "li"
+    });
+  }
+  if (!customElements.get("icon-label")) {
+    customElements.define("icon-label", IconLabel$1);
+  }
+  if (!customElements.get("selection-menu")) {
+    customElements.define("selection-menu", SelectionMenu$1);
+  }
+  if (!customElements.get("image-collection")) {
+    customElements.define("image-collection", ImageCollection$1);
+  }
+  if (!customElements.get("product-layout")) {
+    customElements.define("product-layout", class extends HTMLElement {
+      constructor() {
+        super();
+      }
+    });
+  }
   return Promise.all([customElements.whenDefined("collapsible-list"), customElements.whenDefined("collapsible-item"), customElements.whenDefined("icon-label"), customElements.whenDefined("selection-menu"), customElements.whenDefined("image-collection"), customElements.whenDefined("product-layout")]);
 }
 if (typeof window !== "undefined" && !window.__GENERIC_WEBCOMPONENTS_DEFINED__) {
