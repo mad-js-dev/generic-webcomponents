@@ -18,7 +18,13 @@ const resolveIconPath = (icon) => {
 
 // Create React wrappers for each web component
 const createReactWrapper = (tagName) => {
-  const Component = forwardRef(({ children, style, className, ...props }, ref) => {
+  const Component = forwardRef(({ 
+    children, 
+    style, 
+    className, 
+    onToggle, // Special handler for collapsible-item
+    ...props 
+  }, ref) => {
     const elementRef = useRef(null);
     
     // Handle ref forwarding
@@ -26,20 +32,32 @@ const createReactWrapper = (tagName) => {
       ...(elementRef.current || {}),
       // Add any component-specific methods here
     }));
+
+    // Handle custom element ref
+    const handleRef = (el) => {
+      elementRef.current = el;
+      
+      // Forward the ref
+      if (ref) {
+        if (typeof ref === 'function') {
+          ref(el);
+        } else if (ref) {
+          ref.current = el;
+        }
+      }
+      
+      // Add event listeners for collapsible-item
+      if (tagName === 'collapsible-item' && el) {
+        el.addEventListener('toggle', (e) => {
+          if (onToggle) onToggle(e);
+        });
+      }
+    };
     
-    // Special handling for icon-label to ensure proper styling
+    // Special handling for specific components
     if (tagName === 'icon-label') {
       return React.createElement(tagName, {
-        ref: (el) => {
-          elementRef.current = el;
-          if (ref) {
-            if (typeof ref === 'function') {
-              ref(el);
-            } else if (ref) {
-              ref.current = el;
-            }
-          }
-        },
+        ref: handleRef,
         ...props,
         class: className,
         style: {
@@ -48,6 +66,23 @@ const createReactWrapper = (tagName) => {
         },
         'icon': props.icon ? resolveIconPath(props.icon) : undefined,
         'label': props.label || ''
+      }, children);
+    }
+    
+    // Special handling for collapsible-item
+    if (tagName === 'collapsible-item') {
+      const { expanded, icon, label, removeshift, hideIcon, ...restProps } = props;
+      
+      return React.createElement(tagName, {
+        ref: handleRef,
+        ...restProps,
+        class: className,
+        style: style,
+        'expanded': expanded,
+        'icon': icon,
+        'label': label,
+        'removeshift': removeshift,
+        'hide-icon': hideIcon
       }, children);
     }
     

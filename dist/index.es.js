@@ -1358,24 +1358,37 @@ const resolveIconPath = (icon) => {
   return icon;
 };
 const createReactWrapper = (tagName) => {
-  const Component = forwardRef(({ children, style, className, ...props }, ref) => {
+  const Component = forwardRef(({
+    children,
+    style,
+    className,
+    onToggle,
+    // Special handler for collapsible-item
+    ...props
+  }, ref) => {
     const elementRef = useRef(null);
     useImperativeHandle(ref, () => ({
       ...elementRef.current || {}
       // Add any component-specific methods here
     }));
+    const handleRef = (el) => {
+      elementRef.current = el;
+      if (ref) {
+        if (typeof ref === "function") {
+          ref(el);
+        } else if (ref) {
+          ref.current = el;
+        }
+      }
+      if (tagName === "collapsible-item" && el) {
+        el.addEventListener("toggle", (e) => {
+          if (onToggle) onToggle(e);
+        });
+      }
+    };
     if (tagName === "icon-label") {
       return React.createElement(tagName, {
-        ref: (el) => {
-          elementRef.current = el;
-          if (ref) {
-            if (typeof ref === "function") {
-              ref(el);
-            } else if (ref) {
-              ref.current = el;
-            }
-          }
-        },
+        ref: handleRef,
         ...props,
         class: className,
         style: {
@@ -1385,6 +1398,20 @@ const createReactWrapper = (tagName) => {
         },
         "icon": props.icon ? resolveIconPath(props.icon) : void 0,
         "label": props.label || ""
+      }, children);
+    }
+    if (tagName === "collapsible-item") {
+      const { expanded, icon, label, removeshift, hideIcon, ...restProps } = props;
+      return React.createElement(tagName, {
+        ref: handleRef,
+        ...restProps,
+        class: className,
+        style,
+        "expanded": expanded,
+        "icon": icon,
+        "label": label,
+        "removeshift": removeshift,
+        "hide-icon": hideIcon
       }, children);
     }
     const elementProps = Object.entries(props).reduce((acc, [key, value]) => {
