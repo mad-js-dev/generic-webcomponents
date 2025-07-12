@@ -1221,6 +1221,31 @@ const createReactWrapper = (tagName) => {
         hideIcon,
         ...restProps
       } = props;
+      const headerContent = React.createElement("div", {
+        className: "collapsible-item__header",
+        slot: "header",
+        onClick: (e) => {
+          e.stopPropagation();
+          if (onToggle) onToggle({
+            detail: {
+              expanded: !expanded
+            }
+          });
+        }
+      }, [icon && !hideIcon && React.createElement("icon-label", {
+        key: "icon",
+        icon: resolveIconPath(icon),
+        className: "collapsible-item__icon",
+        slot: "icon"
+      }), label && React.createElement("span", {
+        key: "label",
+        className: "collapsible-item__label",
+        slot: "label"
+      }, label)].filter(Boolean));
+      const content = React.createElement("div", {
+        className: "collapsible-item__content",
+        slot: "content"
+      }, children);
       return React.createElement(tagName, {
         ref: handleRef,
         ...restProps,
@@ -1231,7 +1256,7 @@ const createReactWrapper = (tagName) => {
         "label": label,
         "removeshift": removeshift,
         "hide-icon": hideIcon
-      }, children);
+      }, [headerContent, content]);
     }
     const elementProps = Object.entries(props).reduce((acc, [key, value]) => {
       if (key.startsWith("on") && key[2] === key[2].toUpperCase()) {
