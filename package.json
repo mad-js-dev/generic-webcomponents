@@ -1,6 +1,6 @@
 {
   "name": "@mad-js-dev/generic-webcomponents",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A collection of reusable web components that work across different frameworks",
   "repository": {
     "type": "git",
