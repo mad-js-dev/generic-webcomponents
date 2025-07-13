@@ -6,7 +6,7 @@
  * @property {string} items - JSON string representing the menu items structure
  * @property {string} selected - ID of the currently selected item
  */
-export declare class SelectionMenu extends HTMLElement {
+export class SelectionMenu extends HTMLElement {
     static get observedAttributes(): string[];
     _items: any[];
     _selectedId: any;
@@ -27,5 +27,4 @@ export declare class SelectionMenu extends HTMLElement {
     _hasSelectedDescendant(item: any): any;
     _findItemById(items: any, id: any): any;
 }
-
-export { }
+//# sourceMappingURL=SelectionMenu.d.ts.map

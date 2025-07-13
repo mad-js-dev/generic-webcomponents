@@ -1,0 +1,2 @@
+export function defineCustomElements(): Promise<void> | Promise<[CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor, CustomElementConstructor]>;
+//# sourceMappingURL=init.d.ts.map

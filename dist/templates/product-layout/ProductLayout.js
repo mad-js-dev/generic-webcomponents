@@ -1,5 +1,5 @@
 import "../../organisms/image-collection/ImageCollection.js";
-const s = [
+const defaultImages = [
   {
     title: "Nature",
     src: "images/samples/nature.jpg",
@@ -19,70 +19,95 @@ const s = [
     description: "Close-up of an advanced circuit board."
   }
 ];
-class n extends HTMLElement {
+class ProductLayout extends HTMLElement {
   static get observedAttributes() {
     return ["title", "images"];
   }
   constructor() {
-    super(), this.attachShadow({ mode: "open" }), this._title = "Product Name", this._images = [], this._isConnected = !1, this._hasRendered = !1, this._isUpdating = !1, this._elements = null, this._render = this._render.bind(this);
+    super();
+    this.attachShadow({ mode: "open" });
+    this._title = "Product Name";
+    this._images = [];
+    this._isConnected = false;
+    this._hasRendered = false;
+    this._isUpdating = false;
+    this._elements = null;
+    this._render = this._render.bind(this);
   }
   connectedCallback() {
-    this._isConnected = !0, this._render();
+    this._isConnected = true;
+    this._render();
   }
   disconnectedCallback() {
-    this._isConnected = !1;
+    this._isConnected = false;
   }
-  attributeChangedCallback(t, e, i) {
-    if (e !== i) {
-      if (t === "title")
-        this._title = i || "Product Name", this._updateTitle();
-      else if (t === "images")
-        if (typeof i == "string")
-          try {
-            const a = JSON.parse(i);
-            this.images = Array.isArray(a) ? a : [];
-          } catch (a) {
-            console.error("Invalid images JSON:", a), this.images = [];
-          }
-        else Array.isArray(i) ? this.images = i : this.images = [];
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    if (name === "title") {
+      this._title = newValue || "Product Name";
+      this._updateTitle();
+    } else if (name === "images") {
+      if (typeof newValue === "string") {
+        try {
+          const parsed = JSON.parse(newValue);
+          this.images = Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          console.error("Invalid images JSON:", e);
+          this.images = [];
+        }
+      } else if (Array.isArray(newValue)) {
+        this.images = newValue;
+      } else {
+        this.images = [];
+      }
     }
   }
   get title() {
     return this._title;
   }
-  set title(t) {
-    this._title !== t && (this._title = t || "", this._updateTitle());
+  set title(value) {
+    if (this._title === value) return;
+    this._title = value || "";
+    this._updateTitle();
   }
   get images() {
     return this._images;
   }
-  set images(t) {
-    if (Array.isArray(t))
-      this._images = t.length > 0 ? t : [...s];
-    else if (typeof t == "string")
+  set images(value) {
+    if (Array.isArray(value)) {
+      this._images = value.length > 0 ? value : [...defaultImages];
+    } else if (typeof value === "string") {
       try {
-        const e = JSON.parse(t);
-        this._images = Array.isArray(e) ? e : [...s];
+        const parsed = JSON.parse(value);
+        this._images = Array.isArray(parsed) ? parsed : [...defaultImages];
       } catch (e) {
-        console.error("Invalid images JSON:", e), this._images = [...s];
+        console.error("Invalid images JSON:", e);
+        this._images = [...defaultImages];
       }
-    else
-      this._images = [...s];
+    } else {
+      this._images = [...defaultImages];
+    }
     this._updateImages();
   }
   _updateTitle() {
-    var t;
-    (t = this._elements) != null && t.title && (this._elements.title.textContent = this._title);
+    var _a;
+    if (!((_a = this._elements) == null ? void 0 : _a.title)) return;
+    this._elements.title.textContent = this._title;
   }
   _updateImages() {
-    var t;
-    (t = this._elements) != null && t.imageCollection && (this._elements.imageCollection.images = [...this._images], this._elements.imageCollectionContainer && (this._elements.imageCollectionContainer.style.display = "block"));
+    var _a;
+    if (!((_a = this._elements) == null ? void 0 : _a.imageCollection)) return;
+    this._elements.imageCollection.images = [...this._images];
+    if (this._elements.imageCollectionContainer) {
+      this._elements.imageCollectionContainer.style.display = "block";
+    }
   }
   _render() {
-    if (!(this._isUpdating || !this.shadowRoot)) {
-      this._isUpdating = !0;
-      try {
-        this._hasRendered || (this.shadowRoot.innerHTML = `
+    if (this._isUpdating || !this.shadowRoot) return;
+    this._isUpdating = true;
+    try {
+      if (!this._hasRendered) {
+        this.shadowRoot.innerHTML = `
           <style>
             :host {
               display: block;
@@ -143,20 +168,29 @@ class n extends HTMLElement {
               <image-collection id="imageCollection"></image-collection>
             </div>
           </div>
-        `, this._elements = {
+        `;
+        this._elements = {
           title: this.shadowRoot.getElementById("title"),
           content: this.shadowRoot.getElementById("content"),
           imageCollection: this.shadowRoot.getElementById("imageCollection"),
           imageCollectionContainer: this.shadowRoot.getElementById("imageCollectionContainer")
-        }, this._images.length === 0 && (this._images = [...s]), this._hasRendered = !0), this._updateTitle(), this._updateImages();
-      } finally {
-        this._isUpdating = !1;
+        };
+        if (this._images.length === 0) {
+          this._images = [...defaultImages];
+        }
+        this._hasRendered = true;
       }
+      this._updateTitle();
+      this._updateImages();
+    } finally {
+      this._isUpdating = false;
     }
   }
 }
-typeof window < "u" && !customElements.get("product-layout") && customElements.define("product-layout", n);
+if (typeof window !== "undefined" && !customElements.get("product-layout")) {
+  customElements.define("product-layout", ProductLayout);
+}
 export {
-  n as ProductLayout
+  ProductLayout
 };
 //# sourceMappingURL=ProductLayout.js.map

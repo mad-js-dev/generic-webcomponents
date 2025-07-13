@@ -1,9 +1,14 @@
-class u extends HTMLElement {
+class SelectionMenu extends HTMLElement {
   static get observedAttributes() {
     return ["items", "selected"];
   }
   constructor() {
-    super(), this.attachShadow({ mode: "open" }), this._items = [], this._selectedId = null, this._boundOnItemClick = this._onItemClick.bind(this), import("../../molecules/collapsible-item/CollapsibleItem.js");
+    super();
+    this.attachShadow({ mode: "open" });
+    this._items = [];
+    this._selectedId = null;
+    this._boundOnItemClick = this._onItemClick.bind(this);
+    import("../../molecules/collapsible-item/CollapsibleItem.js");
   }
   connectedCallback() {
     this._render();
@@ -11,31 +16,38 @@ class u extends HTMLElement {
   disconnectedCallback() {
     this._removeEventListeners();
   }
-  attributeChangedCallback(s, i, e) {
-    if (i !== e)
-      switch (s) {
-        case "items":
-          this._items = e ? JSON.parse(e) : [], this._render();
-          break;
-        case "selected":
-          this._selectedId = e, this._updateSelectedState();
-          break;
-      }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
+    switch (name) {
+      case "items":
+        this._items = newValue ? JSON.parse(newValue) : [];
+        this._render();
+        break;
+      case "selected":
+        this._selectedId = newValue;
+        this._updateSelectedState();
+        break;
+    }
   }
   get items() {
     return JSON.stringify(this._items);
   }
-  set items(s) {
-    this._items = s ? JSON.parse(s) : [], this._render();
+  set items(value) {
+    this._items = value ? JSON.parse(value) : [];
+    this._render();
   }
   get selected() {
     return this._selectedId;
   }
-  set selected(s) {
-    this._selectedId !== s && (this._selectedId = s, this._updateSelectedState());
+  set selected(value) {
+    if (this._selectedId !== value) {
+      this._selectedId = value;
+      this._updateSelectedState();
+    }
   }
   _render() {
-    this.shadowRoot && (this.shadowRoot.innerHTML = `
+    if (!this.shadowRoot) return;
+    this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
@@ -153,41 +165,73 @@ class u extends HTMLElement {
       <div class="menu-container">
         ${this._renderItems(this._items, 0)}
       </div>
-    `, this._addEventListeners());
+    `;
+    this._addEventListeners();
   }
-  _renderItems(s, i = 0) {
-    if (!s || !s.length) return "";
-    const e = document.createElement("ul");
-    return e.style.listStyle = "none", e.style.padding = "0", e.style.margin = "0", s.forEach((t) => {
-      const l = t.children && t.children.length > 0, d = this._selectedId === t.id, n = document.createElement("li");
-      if (n.setAttribute("data-id", t.id), l) {
-        n.setAttribute("is", "collapsible-item"), n.setAttribute("data-id", t.id), n.setAttribute("label", t.name);
-        const r = this._hasSelectedDescendant(t) || d;
-        r && n.setAttribute("expanded", ""), n.setAttribute("icon", r ? "▼" : "▶"), n.style.marginRight = "8px", n.style.transition = "transform 0.2s ease", d && n.classList.add("menu-item--selected");
-        const a = document.createElement("ul");
-        a.className = "menu-item__child-list", a.innerHTML = this._renderItems(t.children, i + 1);
-        const c = document.createElement("div");
-        c.slot = "content", c.className = "menu-item__content", c.appendChild(a), n.appendChild(c), n.addEventListener("toggle", (m) => {
-          c.style.display = m.detail.expanded ? "block" : "none";
+  _renderItems(items, level = 0) {
+    if (!items || !items.length) return "";
+    const listContainer = document.createElement("ul");
+    listContainer.style.listStyle = "none";
+    listContainer.style.padding = "0";
+    listContainer.style.margin = "0";
+    items.forEach((item) => {
+      const hasChildren = item.children && item.children.length > 0;
+      const isSelected = this._selectedId === item.id;
+      const li = document.createElement("li");
+      li.setAttribute("data-id", item.id);
+      if (hasChildren) {
+        li.setAttribute("is", "collapsible-item");
+        li.setAttribute("data-id", item.id);
+        li.setAttribute("label", item.name);
+        const hasSelectedDescendant = this._hasSelectedDescendant(item);
+        const isExpanded = hasSelectedDescendant || isSelected;
+        if (isExpanded) {
+          li.setAttribute("expanded", "");
+        }
+        li.setAttribute("icon", isExpanded ? "▼" : "▶");
+        li.style.marginRight = "8px";
+        li.style.transition = "transform 0.2s ease";
+        if (isSelected) {
+          li.classList.add("menu-item--selected");
+        }
+        const childList = document.createElement("ul");
+        childList.className = "menu-item__child-list";
+        childList.innerHTML = this._renderItems(item.children, level + 1);
+        const contentSlot = document.createElement("div");
+        contentSlot.slot = "content";
+        contentSlot.className = "menu-item__content";
+        contentSlot.appendChild(childList);
+        li.appendChild(contentSlot);
+        li.addEventListener("toggle", (e) => {
+          contentSlot.style.display = e.detail.expanded ? "block" : "none";
         });
       } else {
-        const o = document.createElement("span");
-        o.className = "menu-item__leaf", d && o.classList.add("menu-item--selected");
-        const r = document.createElement("span");
-        r.className = "menu-item__label", r.textContent = t.name, o.appendChild(r), o.addEventListener("click", (a) => {
-          a.stopPropagation(), this._selectedId = t.id, this._updateSelectedState(), this.dispatchEvent(new CustomEvent("item-selected", {
+        const span = document.createElement("span");
+        span.className = "menu-item__leaf";
+        if (isSelected) span.classList.add("menu-item--selected");
+        const label = document.createElement("span");
+        label.className = "menu-item__label";
+        label.textContent = item.name;
+        span.appendChild(label);
+        span.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this._selectedId = item.id;
+          this._updateSelectedState();
+          this.dispatchEvent(new CustomEvent("item-selected", {
             detail: {
-              id: t.id,
-              item: t,
-              name: t.name
+              id: item.id,
+              item,
+              name: item.name
             },
-            bubbles: !0,
-            composed: !0
+            bubbles: true,
+            composed: true
           }));
-        }), n.appendChild(o);
+        });
+        li.appendChild(span);
       }
-      e.appendChild(n);
-    }), i === 0 ? e.outerHTML : e.innerHTML;
+      listContainer.appendChild(li);
+    });
+    return level === 0 ? listContainer.outerHTML : listContainer.innerHTML;
   }
   _addEventListeners() {
     this.shadowRoot.addEventListener("click", this._boundOnItemClick);
@@ -195,62 +239,93 @@ class u extends HTMLElement {
   _removeEventListeners() {
     this.shadowRoot.removeEventListener("click", this._boundOnItemClick);
   }
-  _onItemClick(s) {
-    const i = s.target.closest(".menu-item__leaf");
-    if (i) {
-      s.stopPropagation();
-      const l = i.getAttribute("data-id");
-      l && (this.selected = l, this._updateSelectedState(), this.dispatchEvent(new CustomEvent("item-selected", {
-        detail: { id: l },
-        bubbles: !0,
-        composed: !0
-      })));
+  _onItemClick(event) {
+    const leafNode = event.target.closest(".menu-item__leaf");
+    if (leafNode) {
+      event.stopPropagation();
+      const itemId = leafNode.getAttribute("data-id");
+      if (itemId) {
+        this.selected = itemId;
+        this._updateSelectedState();
+        this.dispatchEvent(new CustomEvent("item-selected", {
+          detail: { id: itemId },
+          bubbles: true,
+          composed: true
+        }));
+      }
       return;
     }
-    const e = s.target.closest(".collapsible-item__header");
-    if (!e) return;
-    const t = e.parentElement;
-    if (t && t.getAttribute("is") === "collapsible-item") {
-      s.stopPropagation();
-      const l = t.hasAttribute("expanded"), d = t.querySelector(".menu-item__arrow");
-      l ? (t.removeAttribute("expanded"), d && (d.textContent = "▶")) : (t.setAttribute("expanded", ""), d && (d.textContent = "▼")), t.dispatchEvent(new CustomEvent("toggle", {
-        detail: { expanded: !l },
-        bubbles: !0,
-        composed: !0
+    const header = event.target.closest(".collapsible-item__header");
+    if (!header) return;
+    const itemElement = header.parentElement;
+    if (itemElement && itemElement.getAttribute("is") === "collapsible-item") {
+      event.stopPropagation();
+      const isExpanded = itemElement.hasAttribute("expanded");
+      const arrowIcon = itemElement.querySelector(".menu-item__arrow");
+      if (isExpanded) {
+        itemElement.removeAttribute("expanded");
+        if (arrowIcon) arrowIcon.textContent = "▶";
+      } else {
+        itemElement.setAttribute("expanded", "");
+        if (arrowIcon) arrowIcon.textContent = "▼";
+      }
+      itemElement.dispatchEvent(new CustomEvent("toggle", {
+        detail: { expanded: !isExpanded },
+        bubbles: true,
+        composed: true
       }));
     }
   }
   _updateSelectedState() {
     if (!this.shadowRoot) return;
-    const s = this.shadowRoot.querySelectorAll('li[is="collapsible-item"]'), i = this.shadowRoot.querySelectorAll(".menu-item__leaf");
-    if (s.forEach((e) => {
-      e.classList.remove("menu-item--selected"), e.removeAttribute("selected");
-    }), i.forEach((e) => {
-      e.classList.remove("menu-item--selected");
-    }), this._selectedId) {
-      const e = this.shadowRoot.querySelector(`li[is="collapsible-item"][data-id="${this._selectedId}"]`);
-      e && (e.classList.add("menu-item--selected"), e.setAttribute("selected", ""));
-      const t = this.shadowRoot.querySelector(`li[data-id="${this._selectedId}"] .menu-item__leaf`);
-      t && t.classList.add("menu-item--selected"), !e && !t && console.warn("Could not find selected item in the DOM. It might be in a closed collapsible section.");
+    const allCollapsibleItems = this.shadowRoot.querySelectorAll('li[is="collapsible-item"]');
+    const allLeafItems = this.shadowRoot.querySelectorAll(".menu-item__leaf");
+    allCollapsibleItems.forEach((item) => {
+      item.classList.remove("menu-item--selected");
+      item.removeAttribute("selected");
+    });
+    allLeafItems.forEach((leaf) => {
+      leaf.classList.remove("menu-item--selected");
+    });
+    if (this._selectedId) {
+      const selectedCollapsibleItem = this.shadowRoot.querySelector(`li[is="collapsible-item"][data-id="${this._selectedId}"]`);
+      if (selectedCollapsibleItem) {
+        selectedCollapsibleItem.classList.add("menu-item--selected");
+        selectedCollapsibleItem.setAttribute("selected", "");
+      }
+      const selectedLeafItem = this.shadowRoot.querySelector(`li[data-id="${this._selectedId}"] .menu-item__leaf`);
+      if (selectedLeafItem) {
+        selectedLeafItem.classList.add("menu-item--selected");
+      }
+      if (!selectedCollapsibleItem && !selectedLeafItem) {
+        console.warn("Could not find selected item in the DOM. It might be in a closed collapsible section.");
+      }
     }
   }
-  _hasSelectedDescendant(s) {
-    return s ? s.id === this._selectedId ? !0 : s.children ? s.children.some((i) => this._hasSelectedDescendant(i)) : !1 : !1;
+  _hasSelectedDescendant(item) {
+    if (!item) return false;
+    if (item.id === this._selectedId) return true;
+    if (item.children) {
+      return item.children.some((child) => this._hasSelectedDescendant(child));
+    }
+    return false;
   }
-  _findItemById(s, i) {
-    if (!s || !s.length) return null;
-    for (const e of s) {
-      if (e.id === i) return e;
-      if (e.children) {
-        const t = this._findItemById(e.children, i);
-        if (t) return t;
+  _findItemById(items, id) {
+    if (!items || !items.length) return null;
+    for (const item of items) {
+      if (item.id === id) return item;
+      if (item.children) {
+        const found = this._findItemById(item.children, id);
+        if (found) return found;
       }
     }
     return null;
   }
 }
-customElements.get("selection-menu") || customElements.define("selection-menu", u);
+if (!customElements.get("selection-menu")) {
+  customElements.define("selection-menu", SelectionMenu);
+}
 export {
-  u as SelectionMenu
+  SelectionMenu
 };
 //# sourceMappingURL=SelectionMenu.js.map

@@ -1,4 +1,4 @@
-export declare class ImageCollection extends HTMLElement {
+export class ImageCollection extends HTMLElement {
     static get observedAttributes(): string[];
     _images: any[];
     _handleToggle(event: any): void;
@@ -11,5 +11,4 @@ export declare class ImageCollection extends HTMLElement {
     _onItemToggle(event: any): void;
     render(): void;
 }
-
-export { }
+//# sourceMappingURL=ImageCollection.d.ts.map

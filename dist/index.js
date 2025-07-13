@@ -1,28 +1,52 @@
-import { CollapsibleList as d } from "./molecules/collapsible-list/CollapsibleList.js";
-import { CollapsibleItem as r } from "./molecules/collapsible-item/CollapsibleItem.js";
-let t = {};
-async function n() {
+import { CollapsibleList } from "./molecules/collapsible-list/CollapsibleList.js";
+import { CollapsibleItem } from "./molecules/collapsible-item/CollapsibleItem.js";
+import { IconLabel } from "./atoms/icon-label/IconLabel.js";
+const additionalComponents = {};
+async function loadAdditionalComponents() {
   try {
-    const o = await import("./organisms/selection-menu/SelectionMenu.js");
-    t.SelectionMenu = o.default || o;
-  } catch (o) {
-    console.warn("SelectionMenu component not found or failed to load", o);
+    const { SelectionMenu } = await import("./organisms/selection-menu/SelectionMenu.js");
+    if (SelectionMenu) {
+      additionalComponents.SelectionMenu = SelectionMenu;
+    }
+  } catch (e) {
+    console.warn("SelectionMenu component not found or failed to load", e);
   }
   try {
-    const o = await import("./templates/product-layout/ProductLayout.js");
-    t.ProductLayout = o.default || o;
-  } catch (o) {
-    console.warn("ProductLayout component not found or failed to load", o);
+    const { ProductLayout } = await import("./templates/product-layout/ProductLayout.js");
+    if (ProductLayout) {
+      additionalComponents.ProductLayout = ProductLayout;
+    }
+  } catch (e) {
+    console.warn("ProductLayout component not found or failed to load", e);
   }
-  return t;
+  try {
+    const { ImageCollection } = await import("./organisms/image-collection/ImageCollection.js");
+    if (ImageCollection) {
+      additionalComponents.ImageCollection = ImageCollection;
+    }
+  } catch (e) {
+    console.warn("ImageCollection component not found or failed to load", e);
+  }
+  return additionalComponents;
 }
-function e() {
-  return t;
+function getAdditionalComponents() {
+  return { ...additionalComponents };
 }
+const components = {
+  // Core components
+  CollapsibleList,
+  CollapsibleItem,
+  IconLabel,
+  // Additional components
+  loadAdditionalComponents,
+  getAdditionalComponents
+};
 export {
-  r as CollapsibleItem,
-  d as CollapsibleList,
-  e as getAdditionalComponents,
-  n as loadAdditionalComponents
+  CollapsibleItem,
+  CollapsibleList,
+  IconLabel,
+  components as default,
+  getAdditionalComponents,
+  loadAdditionalComponents
 };
 //# sourceMappingURL=index.js.map

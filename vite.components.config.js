@@ -38,13 +38,14 @@ export default defineConfig({
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
-        exports: 'auto',
+        exports: 'named',
         sourcemap: true
       }
     },
     outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: true
+    sourcemap: true,
+    minify: false
   },
   plugins: [
     dts({

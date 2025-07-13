@@ -19,98 +19,95 @@ export class IconLabel extends HTMLElement {
     this._render();
   }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this[`_${name}`] = newValue;
+      this._render();
+    }
+  }
+
   get icon() {
-    return this._icon;
+    return this.getAttribute('icon') || '';
   }
 
   set icon(value) {
-    this._icon = value || '';
-    this._render();
+    this.setAttribute('icon', value);
   }
 
   get label() {
-    return this._label;
+    return this.getAttribute('label') || '';
   }
 
   set label(value) {
-    this._label = value || '';
-    this._render();
+    this.setAttribute('label', value);
   }
 
   get reverse() {
-    return this._reverse;
+    return this.hasAttribute('reverse');
   }
 
   set reverse(value) {
-    this._reverse = value !== null && value !== 'false';
-    this._render();
+    if (value) {
+      this.setAttribute('reverse', '');
+    } else {
+      this.removeAttribute('reverse');
+    }
   }
 
   _render() {
+    // Clear existing content
+    this.innerHTML = '';
+
     // Create container
     const container = document.createElement('span');
-    container.style.display = 'inline-flex';
-    container.style.alignItems = 'center';
-    container.style.gap = '0.5rem';
-    container.style.fontFamily = 'inherit';
-    container.style.color = 'currentColor';
-    
-    if (this._reverse) {
-      container.style.flexDirection = 'row-reverse';
+    container.className = 'icon-label';
+    if (this.reverse) {
+      container.classList.add('reverse');
     }
 
     // Create icon element if icon is provided
-    if (this._icon) {
-      const isImage = this._icon.startsWith('data:') || 
-                     this._icon.startsWith('http') || 
-                     this._icon.startsWith('/') ||
-                     /\.(png|jpg|jpeg|svg|gif|webp)(\?.*)?$/i.test(this._icon);
-      
-      const icon = isImage ? document.createElement('img') : document.createElement('span');
-      icon.style.display = 'inline-flex';
-      icon.style.alignItems = 'center';
-      icon.style.justifyContent = 'center';
-      icon.style.width = '1em';
-      icon.style.height = '1em';
-
-      if (isImage) {
-        icon.src = this._icon;
-        icon.alt = '';
-        icon.loading = 'lazy';
-        icon.style.objectFit = 'contain';
-      } else {
-        icon.textContent = this._icon;
-        icon.style.fontSize = '1em';
-        icon.style.lineHeight = '1';
-      }
-      
+    if (this.icon) {
+      const icon = document.createElement('i');
+      icon.className = `icon ${this.icon}`;
       container.appendChild(icon);
     }
 
-    // Add label if provided
-    if (this._label) {
+    // Create label element if label is provided
+    if (this.label) {
       const label = document.createElement('span');
-      label.textContent = this._label;
+      label.className = 'label';
+      label.textContent = this.label;
       container.appendChild(label);
     }
 
-    // Update the component
-    this.innerHTML = '';
+    // Apply styles
+    const style = document.createElement('style');
+    style.textContent = `
+      .icon-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .icon-label.reverse {
+        flex-direction: row-reverse;
+      }
+      
+      .icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Add your icon styles here */
+      .icon.heart { color: red; }
+      .icon.star { color: gold; }
+      /* Add more icon styles as needed */
+    `;
+    
+    // Append everything to the component
+    this.appendChild(style);
     this.appendChild(container);
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue === newValue) return;
-    
-    if (name === 'icon') {
-      this._icon = newValue || '';
-    } else if (name === 'label') {
-      this._label = newValue || '';
-    } else if (name === 'reverse') {
-      this._reverse = newValue !== null && newValue !== 'false';
-    }
-    
-    this._render();
   }
 }
 
@@ -118,3 +115,6 @@ export class IconLabel extends HTMLElement {
 if (!customElements.get('icon-label')) {
   customElements.define('icon-label', IconLabel);
 }
+
+// Add default export for better module support
+export default IconLabel;

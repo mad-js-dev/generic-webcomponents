@@ -1,14 +1,45 @@
 import "../../atoms/icon-label/IconLabel.js";
 /* empty css                                                              */
-class r extends HTMLLIElement {
+class CollapsibleItem extends HTMLLIElement {
   static get observedAttributes() {
     return ["expanded", "icon", "label", "removeshift", "hide-icon"];
   }
   constructor() {
-    super(), this._isExpanded = !1, this._handleClick = this._handleClick.bind(this), this._header = null, this._content = null, this._initialRender = !0, this._removeShift = !1, this.rendered = !1, this.classList.add("collapsible-item"), this.hasAttribute("expanded") && (this._isExpanded = !0, this.classList.add("collapsible-item--expanded")), this.hasAttribute("removeshift") && this.classList.add("collapsible-item--no-padding");
+    super();
+    this._isExpanded = false;
+    this._handleClick = this._handleClick.bind(this);
+    this._header = null;
+    this._content = null;
+    this._initialRender = true;
+    this._removeShift = false;
+    this.rendered = false;
+    this.classList.add("collapsible-item");
+    if (this.hasAttribute("expanded")) {
+      this._isExpanded = true;
+      this.classList.add("collapsible-item--expanded");
+    }
+    if (this.hasAttribute("removeshift")) {
+      this.classList.add("collapsible-item--no-padding");
+    }
   }
   connectedCallback() {
-    this.hasAttribute("role") || this.setAttribute("role", "listitem"), this.rendered || (this._render(), this.rendered = !0, this._addEventListeners(), this._updateContentVisibility()), this.classList.add("collapsible-item"), this.hasAttribute("expanded") ? (this._isExpanded = !0, this.classList.add("collapsible-item--expanded")) : (this._isExpanded = !1, this.classList.remove("collapsible-item--expanded"));
+    if (!this.hasAttribute("role")) {
+      this.setAttribute("role", "listitem");
+    }
+    if (!this.rendered) {
+      this._render();
+      this.rendered = true;
+      this._addEventListeners();
+      this._updateContentVisibility();
+    }
+    this.classList.add("collapsible-item");
+    if (this.hasAttribute("expanded")) {
+      this._isExpanded = true;
+      this.classList.add("collapsible-item--expanded");
+    } else {
+      this._isExpanded = false;
+      this.classList.remove("collapsible-item--expanded");
+    }
   }
   disconnectedCallback() {
     this._removeEventListeners();
@@ -19,106 +50,228 @@ class r extends HTMLLIElement {
   _removeEventListeners() {
     this.removeEventListener("click", this._handleClick);
   }
-  _handleClick(e) {
-    if (!e.target.closest(".collapsible-item__header")) return;
-    e.preventDefault(), e.stopPropagation();
-    const s = !this.hasAttribute("expanded");
-    s ? this.setAttribute("expanded", "") : this.removeAttribute("expanded"), this._isExpanded = s, this._updateContentVisibility(), this.dispatchEvent(new CustomEvent("toggle", {
-      detail: { expanded: s },
-      bubbles: !0,
-      composed: !0
+  _handleClick(event) {
+    const header = event.target.closest(".collapsible-item__header");
+    if (!header) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const isExpanding = !this.hasAttribute("expanded");
+    if (isExpanding) {
+      this.setAttribute("expanded", "");
+    } else {
+      this.removeAttribute("expanded");
+    }
+    this._isExpanded = isExpanding;
+    this._updateContentVisibility();
+    this.dispatchEvent(new CustomEvent("toggle", {
+      detail: { expanded: isExpanding },
+      bubbles: true,
+      composed: true
     }));
   }
   _createHeader() {
-    const e = document.createElement("div");
-    e.className = "collapsible-item__header";
-    const i = document.createElement("div");
-    i.style.display = "flex", i.style.alignItems = "center", i.style.flex = "1";
-    const s = this.hasAttribute("hide-icon"), t = this.getAttribute("icon");
-    if (t && !s) {
-      const l = document.createElement("span");
-      l.className = "collapsible-item__icon", l.textContent = t, l.style.marginRight = "0.5rem", i.appendChild(l);
+    const header = document.createElement("div");
+    header.className = "collapsible-item__header";
+    const contentWrapper = document.createElement("div");
+    contentWrapper.style.display = "flex";
+    contentWrapper.style.alignItems = "center";
+    contentWrapper.style.flex = "1";
+    const hideIcon = this.hasAttribute("hide-icon");
+    const icon = this.getAttribute("icon");
+    if (icon && !hideIcon) {
+      const iconEl = document.createElement("span");
+      iconEl.className = "collapsible-item__icon";
+      iconEl.textContent = icon;
+      iconEl.style.marginRight = "0.5rem";
+      contentWrapper.appendChild(iconEl);
     }
-    const n = this.getAttribute("label") || "";
-    if (n) {
-      const l = document.createElement("span");
-      l.className = "collapsible-item__label", l.textContent = n, i.appendChild(l);
+    const label = this.getAttribute("label") || "";
+    if (label) {
+      const labelEl = document.createElement("span");
+      labelEl.className = "collapsible-item__label";
+      labelEl.textContent = label;
+      contentWrapper.appendChild(labelEl);
     }
-    return e.appendChild(i), e;
+    header.appendChild(contentWrapper);
+    return header;
   }
   _render() {
     if (!this._isRendering) {
-      this._isRendering = !0;
-      const e = [];
-      for (Array.from(this.children).forEach((i) => {
-        i !== this._header && i !== this._content && e.push(i);
-      }); this.firstChild; )
+      this._isRendering = true;
+      const existingContent = [];
+      Array.from(this.children).forEach((child) => {
+        if (child !== this._header && child !== this._content) {
+          existingContent.push(child);
+        }
+      });
+      while (this.firstChild) {
         this.removeChild(this.firstChild);
-      this._header = this._createHeader(), this.appendChild(this._header), this._header && (this._header.setAttribute("role", "button"), this._header.setAttribute("aria-expanded", this._isExpanded ? "true" : "false"), this._header.setAttribute("tabindex", "0"), this._header.addEventListener("keydown", (i) => {
-        (i.key === "Enter" || i.key === " ") && (i.preventDefault(), this._toggleExpanded());
-      })), this._content = this._createContent(), this._content && (this.appendChild(this._content), e.forEach((i) => {
-        this._content.appendChild(i);
-      })), this.setAttribute("role", "listitem"), this._updateContentVisibility(), this.rendered = !0, this._isRendering = !1;
+      }
+      this._header = this._createHeader();
+      this.appendChild(this._header);
+      if (this._header) {
+        this._header.setAttribute("role", "button");
+        this._header.setAttribute("aria-expanded", this._isExpanded ? "true" : "false");
+        this._header.setAttribute("tabindex", "0");
+        this._header.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            this._toggleExpanded();
+          }
+        });
+      }
+      this._content = this._createContent();
+      if (this._content) {
+        this.appendChild(this._content);
+        existingContent.forEach((child) => {
+          this._content.appendChild(child);
+        });
+      }
+      this.setAttribute("role", "listitem");
+      this._updateContentVisibility();
+      this.rendered = true;
+      this._isRendering = false;
     }
   }
   _createContent() {
-    const e = document.createElement("div");
-    e.className = "collapsible-item__content";
-    const i = this.querySelectorAll(".collapsible-item__header, .collapsible-item__label, .collapsible-item__icon"), s = new Set(i);
-    return Array.from(this.childNodes).filter((n) => n.nodeType === Node.ELEMENT_NODE ? !s.has(n) && !n.closest(".collapsible-item__header") : n.nodeType === Node.TEXT_NODE ? n.textContent.trim() !== "" && !n.textContent.includes("▶") && !n.textContent.includes("▼") : !1).forEach((n) => {
-      e.appendChild(n.cloneNode(!0));
-    }), e;
+    const content = document.createElement("div");
+    content.className = "collapsible-item__content";
+    const headerElements = this.querySelectorAll(".collapsible-item__header, .collapsible-item__label, .collapsible-item__icon");
+    const headerElementSet = new Set(headerElements);
+    const filteredChildren = Array.from(this.childNodes).filter((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        return !headerElementSet.has(node) && !node.closest(".collapsible-item__header");
+      }
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.textContent.trim() !== "" && !node.textContent.includes("▶") && !node.textContent.includes("▼");
+      }
+      return false;
+    });
+    filteredChildren.forEach((child) => {
+      content.appendChild(child.cloneNode(true));
+    });
+    return content;
   }
   get expanded() {
     return this._isExpanded;
   }
-  set expanded(e) {
-    this._isExpanded !== e && (this._isExpanded = e, this._isExpanded ? this.setAttribute("expanded", "") : this.removeAttribute("expanded"), this._updateContentVisibility(), this.dispatchEvent(new CustomEvent("toggle", {
+  set expanded(value) {
+    if (this._isExpanded === value) return;
+    this._isExpanded = value;
+    if (this._isExpanded) {
+      this.setAttribute("expanded", "");
+    } else {
+      this.removeAttribute("expanded");
+    }
+    this._updateContentVisibility();
+    this.dispatchEvent(new CustomEvent("toggle", {
       detail: { expanded: this._isExpanded },
-      bubbles: !0,
-      composed: !0
-    })));
+      bubbles: true,
+      composed: true
+    }));
   }
   _toggleExpanded() {
-    this._isExpanded = !this._isExpanded, this._isExpanded ? this.setAttribute("expanded", "") : this.removeAttribute("expanded"), this._updateContentVisibility(), this.dispatchEvent(new CustomEvent("toggle", {
+    this._isExpanded = !this._isExpanded;
+    if (this._isExpanded) {
+      this.setAttribute("expanded", "");
+    } else {
+      this.removeAttribute("expanded");
+    }
+    this._updateContentVisibility();
+    this.dispatchEvent(new CustomEvent("toggle", {
       detail: { expanded: this._isExpanded },
-      bubbles: !0,
-      composed: !0
+      bubbles: true,
+      composed: true
     }));
   }
   _updateContentVisibility() {
     if (!this._content || !this._header) return;
-    const e = this.hasAttribute("hide-icon");
-    this._isExpanded ? (this._content.classList.add("collapsible-item__content--expanded"), this._content.style.display = "block", this._header.setAttribute("aria-expanded", "true"), this.classList.add("collapsible-item--expanded"), e || this.setAttribute("icon", "▼")) : (this._content.classList.remove("collapsible-item__content--expanded"), this._content.style.display = "none", this._header.setAttribute("aria-expanded", "false"), this.classList.remove("collapsible-item--expanded"), e || this.setAttribute("icon", "▶"));
-  }
-  attributeChangedCallback(e, i, s) {
-    if (e === "removeshift")
-      this._removeShift = s !== null, this._removeShift ? this.classList.add("collapsible-item--no-padding") : this.classList.remove("collapsible-item--no-padding");
-    else if (e === "hide-icon" && this._header) {
-      const t = this._header.querySelector(".collapsible-item__icon");
-      if (s !== null)
-        t && t.remove();
-      else if (this.hasAttribute("icon") && !t) {
-        const n = this.getAttribute("icon"), l = document.createElement("span");
-        l.className = "collapsible-item__icon", l.textContent = n, l.style.marginRight = "0.5rem";
-        const a = this._header.firstElementChild;
-        a && a.insertBefore(l, a.firstChild);
+    const hideIcon = this.hasAttribute("hide-icon");
+    if (this._isExpanded) {
+      this._content.classList.add("collapsible-item__content--expanded");
+      this._content.style.display = "block";
+      this._header.setAttribute("aria-expanded", "true");
+      this.classList.add("collapsible-item--expanded");
+      if (!hideIcon) {
+        this.setAttribute("icon", "▼");
       }
-    } else if (e === "expanded") {
-      const t = this._isExpanded;
-      this._isExpanded = s !== null, this._isExpanded !== t && this._updateContentVisibility();
-    } else if (e === "icon" && this._header) {
-      let t = this._header.querySelector(".collapsible-item__icon");
-      s ? (t || (t = document.createElement("span"), t.className = "collapsible-item__icon", this._header.insertBefore(t, this._header.firstChild)), t.textContent = s) : t && this._header.removeChild(t);
-    } else if (e === "label" && this._header) {
-      let t = this._header.querySelector(".collapsible-item__label");
-      t ? t.textContent = s || "" : s && (t = document.createElement("span"), t.className = "collapsible-item__label", t.textContent = s, this._header.appendChild(t));
+    } else {
+      this._content.classList.remove("collapsible-item__content--expanded");
+      this._content.style.display = "none";
+      this._header.setAttribute("aria-expanded", "false");
+      this.classList.remove("collapsible-item--expanded");
+      if (!hideIcon) {
+        this.setAttribute("icon", "▶");
+      }
+    }
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "removeshift") {
+      this._removeShift = newValue !== null;
+      if (this._removeShift) {
+        this.classList.add("collapsible-item--no-padding");
+      } else {
+        this.classList.remove("collapsible-item--no-padding");
+      }
+    } else if (name === "hide-icon" && this._header) {
+      const iconEl = this._header.querySelector(".collapsible-item__icon");
+      if (newValue !== null) {
+        if (iconEl) {
+          iconEl.remove();
+        }
+      } else if (this.hasAttribute("icon")) {
+        if (!iconEl) {
+          const icon = this.getAttribute("icon");
+          const newIconEl = document.createElement("span");
+          newIconEl.className = "collapsible-item__icon";
+          newIconEl.textContent = icon;
+          newIconEl.style.marginRight = "0.5rem";
+          const contentWrapper = this._header.firstElementChild;
+          if (contentWrapper) {
+            contentWrapper.insertBefore(newIconEl, contentWrapper.firstChild);
+          }
+        }
+      }
+    } else if (name === "expanded") {
+      const wasExpanded = this._isExpanded;
+      this._isExpanded = newValue !== null;
+      if (this._isExpanded !== wasExpanded) {
+        this._updateContentVisibility();
+      }
+    } else if (name === "icon" && this._header) {
+      let iconEl = this._header.querySelector(".collapsible-item__icon");
+      if (newValue) {
+        if (!iconEl) {
+          iconEl = document.createElement("span");
+          iconEl.className = "collapsible-item__icon";
+          this._header.insertBefore(iconEl, this._header.firstChild);
+        }
+        iconEl.textContent = newValue;
+      } else if (iconEl) {
+        this._header.removeChild(iconEl);
+      }
+    } else if (name === "label" && this._header) {
+      let labelEl = this._header.querySelector(".collapsible-item__label");
+      if (labelEl) {
+        labelEl.textContent = newValue || "";
+      } else if (newValue) {
+        labelEl = document.createElement("span");
+        labelEl.className = "collapsible-item__label";
+        labelEl.textContent = newValue;
+        this._header.appendChild(labelEl);
+      }
     }
   }
 }
-const d = "collapsible-item";
-typeof window < "u" && window.customElements && (window.customElements.get(d) && (window.customElements.get(d), delete window.customElements._elements[d]), window.customElements.define(d, r, { extends: "li" }));
+const elementName = "collapsible-item";
+if (typeof window !== "undefined" && window.customElements) {
+  if (window.customElements.get(elementName)) {
+    window.customElements.get(elementName);
+    delete window.customElements._elements[elementName];
+  }
+  window.customElements.define(elementName, CollapsibleItem, { extends: "li" });
+}
 export {
-  r as CollapsibleItem
+  CollapsibleItem
 };
 //# sourceMappingURL=CollapsibleItem.js.map

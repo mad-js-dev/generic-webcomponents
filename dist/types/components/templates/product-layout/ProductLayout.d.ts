@@ -1,4 +1,4 @@
-export declare class ProductLayout extends HTMLElement {
+export class ProductLayout extends HTMLElement {
     static get observedAttributes(): string[];
     _title: string;
     _images: any[];
@@ -20,5 +20,4 @@ export declare class ProductLayout extends HTMLElement {
     _updateTitle(): void;
     _updateImages(): void;
 }
-
-export { }
+//# sourceMappingURL=ProductLayout.d.ts.map

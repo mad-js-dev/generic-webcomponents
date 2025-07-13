@@ -1,0 +1,96 @@
+/* Base styles for the component */
+li[is="collapsible-item"] {
+    --collapsible-item-padding: 0.5rem 1rem;
+    --collapsible-item-indicator-size: 1em;
+    position: relative;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Header styles */
+.collapsible-item__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--collapsible-item-padding);
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    width: 100%;
+    border: none;
+    text-align: left;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+.collapsible-item__header:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Icon label styles */
+.collapsible-item__header icon-label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Expand/collapse indicator */
+.collapsible-item__indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--collapsible-item-indicator-size);
+    height: var(--collapsible-item-indicator-size);
+    margin-left: 0.5rem;
+}
+
+/* Content styles */
+.collapsible-item__content {
+    display: none;
+    padding: 0.25rem 0 0.25rem 1.5rem;
+    margin: 0;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+.collapsible-item__content--expanded {
+    display: block;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+/* Nested items */
+.collapsible-item--nested {
+    margin-left: 1rem;
+}
+
+/* No padding variant */
+.collapsible-item--no-padding .collapsible-item__content {
+    padding-left: 0;
+}
+
+/* Content spacing */
+.collapsible-item__content > * {
+    margin: 0.5rem 0;
+}
+
+.collapsible-item__content > *:first-child {
+    margin-top: 0;
+}
+
+.collapsible-item__content > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Selection styles */
+.menu-item--selected > .collapsible-item__header {
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.05);
+}

@@ -1,11 +1,16 @@
-class c extends HTMLElement {
+class CollapsibleList extends HTMLElement {
   static get observedAttributes() {
     return ["reverse-heading", "single-item", "accordion"];
   }
   constructor() {
-    super(), this.attachShadow({ mode: "open" }), this._isUpdating = !1, this._handleItemToggle = this._handleItemToggle.bind(this);
-    const t = document.createElement("div"), e = document.createElement("slot"), i = document.createElement("style");
-    i.textContent = `
+    super();
+    this.attachShadow({ mode: "open" });
+    this._isUpdating = false;
+    this._handleItemToggle = this._handleItemToggle.bind(this);
+    const container = document.createElement("div");
+    const slot = document.createElement("slot");
+    const style = document.createElement("style");
+    style.textContent = `
       :host {
         display: block;
         width: 100%;
@@ -43,35 +48,56 @@ class c extends HTMLElement {
         height: var(--toggle-size, 24px);
         margin: var(--toggle-margin, 0 8px 0 0);
         flex-shrink: 0;
-      }`, t.appendChild(e), this.shadowRoot.append(i, t);
+      }`;
+    container.appendChild(slot);
+    this.shadowRoot.append(style, container);
   }
   async connectedCallback() {
-    this._initialized || (this._initializeComponent(), this._initialized = !0, await this._updateReverseHeading(), this.addEventListener("toggle", this._handleItemToggle), this.hasAttribute("accordion") && this._ensureOneItemExpanded()), this._setupMutationObserver();
+    if (!this._initialized) {
+      this._initializeComponent();
+      this._initialized = true;
+      await this._updateReverseHeading();
+      this.addEventListener("toggle", this._handleItemToggle);
+      if (this.hasAttribute("accordion")) {
+        this._ensureOneItemExpanded();
+      }
+    }
+    this._setupMutationObserver();
   }
   _initializeComponent() {
-    this.hasAttribute("role") || this.setAttribute("role", "list"), !this.hasAttribute("aria-label") && !this.hasAttribute("aria-labelledby") && console.warn("collapsible-list: Add an aria-label or aria-labelledby attribute for accessibility");
+    if (!this.hasAttribute("role")) {
+      this.setAttribute("role", "list");
+    }
+    if (!this.hasAttribute("aria-label") && !this.hasAttribute("aria-labelledby")) {
+      console.warn("collapsible-list: Add an aria-label or aria-labelledby attribute for accessibility");
+    }
   }
   _setupMutationObserver() {
-    this._observer = new MutationObserver(async (t) => {
-      let e = !1;
-      for (const i of t)
-        if (i.type === "attributes" && i.attributeName === "reverse-heading") {
-          e = !0;
+    this._observer = new MutationObserver(async (mutations) => {
+      let shouldUpdate = false;
+      for (const mutation of mutations) {
+        if (mutation.type === "attributes" && mutation.attributeName === "reverse-heading") {
+          shouldUpdate = true;
           break;
-        } else if (i.type === "childList") {
-          for (const r of i.addedNodes)
-            if (r.nodeType === Node.ELEMENT_NODE && (r.matches("collapsible-item") || r.matches("collapsible-list"))) {
-              e = !0;
+        } else if (mutation.type === "childList") {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType === Node.ELEMENT_NODE && (node.matches("collapsible-item") || node.matches("collapsible-list"))) {
+              shouldUpdate = true;
               break;
             }
-          if (e) break;
+          }
+          if (shouldUpdate) break;
         }
-      e && await this._updateReverseHeading();
-    }), this._observer.observe(this, {
-      attributes: !0,
+      }
+      if (shouldUpdate) {
+        await this._updateReverseHeading();
+      }
+    });
+    this._observer.observe(this, {
+      attributes: true,
       attributeFilter: ["reverse-heading"],
-      childList: !0,
-      subtree: !0
+      childList: true,
+      subtree: true
     });
   }
   /**
@@ -79,54 +105,99 @@ class c extends HTMLElement {
    * @private
    */
   async _updateReverseHeading() {
-    if (!this._isUpdating) {
-      this._isUpdating = !0;
-      try {
-        const t = this.hasAttribute("reverse-heading") && this.getAttribute("reverse-heading") !== "false";
-        this._observer && this._observer.disconnect();
-        const e = async (o) => {
-          for (const s of o) {
-            t ? s.setAttribute("reverse-heading", "") : s.removeAttribute("reverse-heading");
-            const l = s.querySelectorAll(":scope > collapsible-item");
-            l.length > 0 && await e(Array.from(l));
-            const a = s.querySelectorAll(":scope > collapsible-list");
-            a.length > 0 && await i(Array.from(a));
-          }
-        }, i = async (o) => {
-          for (const s of o) {
-            if (s === this) continue;
-            t ? s.setAttribute("reverse-heading", "") : s.removeAttribute("reverse-heading");
-            const l = s.querySelectorAll(":scope > collapsible-item");
-            l.length > 0 && await e(Array.from(l));
-            const a = s.querySelectorAll(":scope > collapsible-list");
-            a.length > 0 && await i(Array.from(a));
-          }
-        }, r = this.querySelectorAll(":scope > collapsible-item");
-        r.length > 0 && await e(Array.from(r));
-        const n = this.querySelectorAll(":scope > collapsible-list");
-        n.length > 0 && await i(Array.from(n)), this.shadowRoot && this.shadowRoot.offsetHeight;
-      } catch (t) {
-        console.error("Error updating reverse heading:", t);
-      } finally {
-        this._observer && this._observer.observe(this, {
-          attributes: !0,
-          attributeFilter: ["reverse-heading"],
-          childList: !0,
-          subtree: !0
-        }), this._isUpdating = !1;
+    if (this._isUpdating) return;
+    this._isUpdating = true;
+    try {
+      const isReversed = this.hasAttribute("reverse-heading") && this.getAttribute("reverse-heading") !== "false";
+      if (this._observer) {
+        this._observer.disconnect();
       }
+      const processItems = async (items2) => {
+        for (const item of items2) {
+          if (isReversed) {
+            item.setAttribute("reverse-heading", "");
+          } else {
+            item.removeAttribute("reverse-heading");
+          }
+          const nestedItems = item.querySelectorAll(":scope > collapsible-item");
+          if (nestedItems.length > 0) {
+            await processItems(Array.from(nestedItems));
+          }
+          const nestedLists = item.querySelectorAll(":scope > collapsible-list");
+          if (nestedLists.length > 0) {
+            await processLists(Array.from(nestedLists));
+          }
+        }
+      };
+      const processLists = async (lists2) => {
+        for (const list of lists2) {
+          if (list === this) continue;
+          if (isReversed) {
+            list.setAttribute("reverse-heading", "");
+          } else {
+            list.removeAttribute("reverse-heading");
+          }
+          const nestedItems = list.querySelectorAll(":scope > collapsible-item");
+          if (nestedItems.length > 0) {
+            await processItems(Array.from(nestedItems));
+          }
+          const nestedLists = list.querySelectorAll(":scope > collapsible-list");
+          if (nestedLists.length > 0) {
+            await processLists(Array.from(nestedLists));
+          }
+        }
+      };
+      const items = this.querySelectorAll(":scope > collapsible-item");
+      if (items.length > 0) {
+        await processItems(Array.from(items));
+      }
+      const lists = this.querySelectorAll(":scope > collapsible-list");
+      if (lists.length > 0) {
+        await processLists(Array.from(lists));
+      }
+      if (this.shadowRoot) {
+        this.shadowRoot.offsetHeight;
+      }
+    } catch (error) {
+      console.error("Error updating reverse heading:", error);
+    } finally {
+      if (this._observer) {
+        this._observer.observe(this, {
+          attributes: true,
+          attributeFilter: ["reverse-heading"],
+          childList: true,
+          subtree: true
+        });
+      }
+      this._isUpdating = false;
     }
   }
-  _handleItemToggle(t) {
+  _handleItemToggle(e) {
     if (this._isUpdating) return;
-    const e = t.target;
-    e.parentElement === this && (this._isUpdating = !0, this.hasAttribute("accordion") ? e.expanded && this._closeOtherItems(e) : this.hasAttribute("single-item") && e.expanded && this._closeOtherItems(e), this._isUpdating = !1);
+    const target = e.target;
+    if (target.parentElement === this) {
+      this._isUpdating = true;
+      if (this.hasAttribute("accordion")) {
+        if (target.expanded) {
+          this._closeOtherItems(target);
+        }
+      } else if (this.hasAttribute("single-item")) {
+        if (target.expanded) {
+          this._closeOtherItems(target);
+        }
+      }
+      this._isUpdating = false;
+    }
   }
-  _closeOtherItems(t) {
-    if (this.closest("image-collection"))
+  _closeOtherItems(exceptItem) {
+    if (this.closest("image-collection")) {
       return;
-    this.querySelectorAll("collapsible-item").forEach((i) => {
-      i !== t && (i.expanded = !1);
+    }
+    const items = this.querySelectorAll("collapsible-item");
+    items.forEach((item) => {
+      if (item !== exceptItem) {
+        item.expanded = false;
+      }
     });
   }
   _getOpenItems() {
@@ -134,14 +205,19 @@ class c extends HTMLElement {
   }
   _ensureOneItemExpanded() {
     if (!this.hasAttribute("accordion")) return;
-    if (this._getOpenItems().length === 0) {
-      const e = this.querySelector("collapsible-item");
-      e && e.setAttribute("expanded", "");
+    const openItems = this._getOpenItems();
+    if (openItems.length === 0) {
+      const firstItem = this.querySelector("collapsible-item");
+      if (firstItem) {
+        firstItem.setAttribute("expanded", "");
+      }
     }
   }
 }
-customElements.get("collapsible-list") || customElements.define("collapsible-list", c);
+if (!customElements.get("collapsible-list")) {
+  customElements.define("collapsible-list", CollapsibleList);
+}
 export {
-  c as CollapsibleList
+  CollapsibleList
 };
 //# sourceMappingURL=CollapsibleList.js.map

@@ -1,77 +1,111 @@
 import "../../molecules/collapsible-item/CollapsibleItem.js";
-class r extends HTMLElement {
+class ImageCollection extends HTMLElement {
   static get observedAttributes() {
     return ["images"];
   }
   constructor() {
-    super(), this.attachShadow({ mode: "open" }), this._images = [], this._handleToggle = this._handleToggle.bind(this), this._currentOpenIndex = 0;
+    super();
+    this.attachShadow({ mode: "open" });
+    this._images = [];
+    this._handleToggle = this._handleToggle.bind(this);
+    this._currentOpenIndex = 0;
   }
   get images() {
     return this._images;
   }
-  set images(e) {
-    if (Array.isArray(e))
-      this._images = e, this.render();
-    else if (typeof e == "string")
+  set images(value) {
+    if (Array.isArray(value)) {
+      this._images = value;
+      this.render();
+    } else if (typeof value === "string") {
       try {
-        this._images = JSON.parse(e), this.render();
-      } catch {
+        this._images = JSON.parse(value);
+        this.render();
+      } catch (e) {
       }
+    }
   }
   connectedCallback() {
-    this.render(), this.shadowRoot.addEventListener("toggle", this._handleToggle);
+    this.render();
+    this.shadowRoot.addEventListener("toggle", this._handleToggle);
   }
   disconnectedCallback() {
     this.shadowRoot.removeEventListener("toggle", this._handleToggle);
   }
-  _handleToggle(e) {
-    if (e.stopPropagation(), this._isHandlingToggle) return;
-    this._isHandlingToggle = !0;
-    let t = -1, o = !1;
+  _handleToggle(event) {
+    event.stopPropagation();
+    if (this._isHandlingToggle) return;
+    this._isHandlingToggle = true;
+    let index = -1;
+    let wasExpanded = false;
     try {
-      const i = e.composedPath().find(
-        (n) => n.nodeType === Node.ELEMENT_NODE && n.getAttribute && n.getAttribute("is") === "collapsible-item"
+      const target = event.composedPath().find(
+        (node) => node.nodeType === Node.ELEMENT_NODE && node.getAttribute && node.getAttribute("is") === "collapsible-item"
       );
-      if (!i)
+      if (!target) {
         return;
-      const l = Array.from(this.shadowRoot.querySelectorAll('li[is="collapsible-item"]'));
-      if (t = l.indexOf(i), t === -1 || t === this._currentOpenIndex)
+      }
+      const allItems = Array.from(this.shadowRoot.querySelectorAll('li[is="collapsible-item"]'));
+      index = allItems.indexOf(target);
+      if (index === -1) {
         return;
-      o = i.expanded, l.forEach((n, s) => {
-        s !== t && n.expanded && (n.expanded = !1);
-      }), t === this._currentOpenIndex ? (i.expanded = !1, this._currentOpenIndex = -1) : (i.expanded = !0, this._currentOpenIndex = t);
+      }
+      if (index === this._currentOpenIndex) {
+        return;
+      }
+      wasExpanded = target.expanded;
+      allItems.forEach((item, i) => {
+        if (i !== index && item.expanded) {
+          item.expanded = false;
+        }
+      });
+      if (index === this._currentOpenIndex) {
+        target.expanded = false;
+        this._currentOpenIndex = -1;
+      } else {
+        target.expanded = true;
+        this._currentOpenIndex = index;
+      }
     } finally {
-      this._isHandlingToggle = !1;
+      this._isHandlingToggle = false;
     }
     this.dispatchEvent(new CustomEvent("toggle", {
       detail: {
-        index: t,
-        expanded: !o,
+        index,
+        expanded: !wasExpanded,
         source: "image-collection"
       },
-      bubbles: !0,
-      composed: !0
+      bubbles: true,
+      composed: true
     }));
   }
-  _onItemToggle(e) {
-    e.stopPropagation();
-    const t = e.target.closest('li[is="collapsible-item"]');
-    if (!t) return;
-    const o = Array.from(this.shadowRoot.querySelectorAll('li[is="collapsible-item"]')), i = o.indexOf(t);
-    if (i !== -1) {
-      if (!e.detail.expanded) {
-        this._currentOpenIndex === i && (this._currentOpenIndex = -1);
-        return;
+  _onItemToggle(event) {
+    event.stopPropagation();
+    const targetItem = event.target.closest('li[is="collapsible-item"]');
+    if (!targetItem) return;
+    const items = Array.from(this.shadowRoot.querySelectorAll('li[is="collapsible-item"]'));
+    const index = items.indexOf(targetItem);
+    if (index === -1) return;
+    if (!event.detail.expanded) {
+      if (this._currentOpenIndex === index) {
+        this._currentOpenIndex = -1;
       }
-      if (this._currentOpenIndex !== -1 && this._currentOpenIndex !== i) {
-        const l = o[this._currentOpenIndex];
-        l && l.toggle(!1);
-      }
-      this._currentOpenIndex = i;
+      return;
     }
+    if (this._currentOpenIndex !== -1 && this._currentOpenIndex !== index) {
+      const previousItem = items[this._currentOpenIndex];
+      if (previousItem) {
+        previousItem.toggle(false);
+      }
+    }
+    this._currentOpenIndex = index;
   }
   render() {
-    this.shadowRoot && (this._currentOpenIndex === -1 && this._images.length > 0 && (this._currentOpenIndex = 0), this.shadowRoot.innerHTML = `
+    if (!this.shadowRoot) return;
+    if (this._currentOpenIndex === -1 && this._images.length > 0) {
+      this._currentOpenIndex = 0;
+    }
+    this.shadowRoot.innerHTML = `
             <style>
                 .image-collection {
                     width: 100%;
@@ -141,18 +175,18 @@ class r extends HTMLElement {
             </style>
             <div class="image-collection">
                 <ul class="image-collection__container">
-                    ${this._images.map((e, t) => `
+                    ${this._images.map((image, index) => `
                         <li is="collapsible-item" 
-                            label="${e.title}" 
-                            ${e.removeshift ? 'removeshift="true"' : ""}
-                            ${this._currentOpenIndex === t ? "expanded" : ""}
+                            label="${image.title}" 
+                            ${image.removeshift ? 'removeshift="true"' : ""}
+                            ${this._currentOpenIndex === index ? "expanded" : ""}
                             hide-icon
                             >
                             <div slot="content">
                                 <img 
                                     class="image-collection__image" 
-                                    src="${e.src}" 
-                                    alt="${e.title}"
+                                    src="${image.src}" 
+                                    alt="${image.title}"
                                     loading="lazy"
                                 >
                             </div>
@@ -160,11 +194,13 @@ class r extends HTMLElement {
                     `).join("")}
                 </ul>
             </div>
-        `);
+        `;
   }
 }
-customElements.get("image-collection") || customElements.define("image-collection", r);
+if (!customElements.get("image-collection")) {
+  customElements.define("image-collection", ImageCollection);
+}
 export {
-  r as ImageCollection
+  ImageCollection
 };
 //# sourceMappingURL=ImageCollection.js.map

@@ -1,30 +1,68 @@
-// Core components
-export * from './molecules/collapsible-list/CollapsibleList.js';
-export * from './molecules/collapsible-item/CollapsibleItem.js';
+// Import all components
+import { CollapsibleList } from './molecules/collapsible-list/CollapsibleList.js';
+import { CollapsibleItem } from './molecules/collapsible-item/CollapsibleItem.js';
+import { IconLabel } from './atoms/icon-label/IconLabel.js';
 
 // Additional components (dynamically imported when needed)
-let additionalComponents = {};
+const additionalComponents = {};
 
 // Function to load additional components
-export async function loadAdditionalComponents() {
+async function loadAdditionalComponents() {
   try {
-    const selectionMenuModule = await import('./organisms/selection-menu/SelectionMenu.js');
-    additionalComponents.SelectionMenu = selectionMenuModule.default || selectionMenuModule;
+    const { SelectionMenu } = await import('./organisms/selection-menu/SelectionMenu.js');
+    if (SelectionMenu) {
+      additionalComponents.SelectionMenu = SelectionMenu;
+    }
   } catch (e) {
     console.warn('SelectionMenu component not found or failed to load', e);
   }
 
   try {
-    const productLayoutModule = await import('./templates/product-layout/ProductLayout.js');
-    additionalComponents.ProductLayout = productLayoutModule.default || productLayoutModule;
+    const { ProductLayout } = await import('./templates/product-layout/ProductLayout.js');
+    if (ProductLayout) {
+      additionalComponents.ProductLayout = ProductLayout;
+    }
   } catch (e) {
     console.warn('ProductLayout component not found or failed to load', e);
   }
-  
+
+  try {
+    const { ImageCollection } = await import('./organisms/image-collection/ImageCollection.js');
+    if (ImageCollection) {
+      additionalComponents.ImageCollection = ImageCollection;
+    }
+  } catch (e) {
+    console.warn('ImageCollection component not found or failed to load', e);
+  }
+
   return additionalComponents;
 }
 
-// Export a function to get additional components
-export function getAdditionalComponents() {
-  return additionalComponents;
+// Function to get additional components
+function getAdditionalComponents() {
+  return { ...additionalComponents };
 }
+
+// Export everything
+const components = {
+  // Core components
+  CollapsibleList,
+  CollapsibleItem,
+  IconLabel,
+  
+  // Additional components
+  loadAdditionalComponents,
+  getAdditionalComponents
+};
+
+// Named exports
+export {
+  CollapsibleList,
+  CollapsibleItem,
+  IconLabel,
+  loadAdditionalComponents,
+  getAdditionalComponents
+};
+
+// Default export
+export default components;
